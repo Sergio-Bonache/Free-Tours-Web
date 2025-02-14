@@ -4,14 +4,14 @@
       <div class="row">
         <h3 class="text-decoration-underline text-center"><img src="../assets/images/palmera-fondo-verde.png" alt="logo"
             height="38"> Viajes Quinto Pino</h3>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3 initialBox">
           <h4 class="fst-italic">Contacto</h4>
           <ul class="list-unstyled">
             <li><img src="../assets/images/mail.png" alt="Sobre" height="30" class="me-2">quintopino@contact.com</li>
             <li><img src="../assets/images/phone.png" alt="Telefono" height="30" class="me-2"> +34 656 45 45 45</li>
           </ul>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
           <h4 class="fst-italic">Síguenos</h4>
           <ul class="list-unstyled">
             <li><img src="../assets/images/instagram.png" alt="Instagram" height="30" class="me-2">Instagram</li>
@@ -20,7 +20,7 @@
             <li><img src="../assets/images/facebook.png" alt="Facebook" height="30" class="me-2">Facebook</li>
           </ul>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
           <h4 class="fst-italic">Más...</h4>
           <ul class="list-unstyled">
             <li><img src="../assets/images/book.png" alt="Libro" height="30" class="me-2">Nuestra Historia</li>
@@ -51,5 +51,9 @@
 <style>
 footer {
   background-color: #EEEEEE;
+}
+
+.initialBox {
+  margin-left: 21%;
 }
 </style>
