@@ -94,7 +94,7 @@ let preguntas = [
             <div class="card">
                 <div class="card-body">
                     <h5 class="fs-3 text-decoration-underline">¿Por qué elegirnos?</h5>
-                    <p class="card-text">En VIAJES QUINTO PINO nos apasiona ofrecerte una experiencia única. Nos destacamos por la calidad de nuestros tours y el compromiso con cada viajero, asegurándonos de que cada recorrido sea memorable y auténtico.</p>
+                    <p class="card-text">En Viajes Quinto Pino nos apasiona ofrecerte una experiencia única. Nos destacamos por la calidad de nuestros tours y el compromiso con cada viajero, asegurándonos de que cada recorrido sea memorable y auténtico.</p>
                 </div>
             </div>
         </div>
