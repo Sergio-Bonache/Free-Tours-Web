@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
-import { router } from 'vue-router'
-
+import { useRouter } from 'vue-router'
+const router = useRouter();
 const form = ref({ usuario: '', email: '', password: '' })
 const error = ref('')
 
