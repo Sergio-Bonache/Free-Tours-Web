@@ -3,24 +3,22 @@ import router from "@/router";
 import {ref} from "vue"
 import { RouterLink } from "vue-router";
 const emit = defineEmits(["sesionIniciada"])
-const form = ref({ usuario: '', password: '' });
+const form = ref({ email: '', password: '' });
 const error = ref('');
 
 async function iniciarSesion() {
     try {
-        const response = await fetch('/usuarios.json');
+        const response = await fetch('http://localhost/freetours/api.php/usuarios');
         const usuarios = await response.json();
 
         const usuarioEncontrado = usuarios.find(
-            (u) => u.usuario === form.value.usuario && u.password === form.value.password
+            (u) => u.email == form.value.email && u.contraseña == form.value.password
         );
 
         if (usuarioEncontrado) {
-
-
-            //TODO: HABRÍA QUE NOTIFICAR A APP.VUE CON UN EMIT PARA QUE SEPA QUE LA SESIÓN ESTÁ INICIADA
             emit("sesionIniciada", {
-                usuario:usuarioEncontrado.usuario,
+                nombre : usuarioEncontrado.nombre,
+                email:usuarioEncontrado.email,
                 rol: usuarioEncontrado.rol
             })
             error.value = '';
@@ -52,8 +50,8 @@ async function iniciarSesion() {
                 </p>
                 <form @submit.prevent="iniciarSesion">
                   <div class="mb-3">
-                    <label for="username" class="form-label">Correo electrónico</label>
-                    <input v-model="form.usuario" type="text" class="form-control" id="username" placeholder="Ingresa tu correo" />
+                    <label for="email" class="form-label">Correo electrónico</label>
+                    <input v-model="form.email" type="text" class="form-control" id="email" placeholder="Ingresa tu correo" />
                   </div>
                   <div class="mb-3">
                     <label for="password" class="form-label">Contraseña</label>
@@ -70,7 +68,7 @@ async function iniciarSesion() {
               </div>
             </div>
             <!--Columna imagen-->
-            <div class="col-lg-6 d-none d-lg-block position-relative" style="height: 92vh;">
+            <div class="col-lg-6 d-none d-lg-block position-relative" style="height: 72vh;">
               <img src="../assets/images/lake.jpg" alt="Lago" class="img-fluid w-100 h-100" style="object-fit: cover;" />
             </div>
           </div>

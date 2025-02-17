@@ -13,17 +13,13 @@ function actualizaDatosSesion(usuario) {
   sesion.value = usuario;
   localStorage.setItem('sesion', JSON.stringify(usuario));
 }
-
-function irAbout() {
-    router.push("/login")
-}
 </script>
 
 <template>
   <div class="layout">
 
     <!--HACER E INCLUIR COMPONENTE DE BARRA DE NAVEGACIÓN CON OPCIONES VISIBLES SEGÚN EL ROL DEL USUARIO-->
-    <Header :usuarioAutenticado="sesion" @sesionCerrada="actualizaDatosSesion" title="Aplicacion Juana" :datosUsuario="sesion"></Header>
+    <Header :usuarioAutenticado="sesion" @sesionCerrada="actualizaDatosSesion" :datosUsuario="sesion"></Header>
 
     <RouterView @sesionIniciada="actualizaDatosSesion"></RouterView>
     <Footer></Footer>

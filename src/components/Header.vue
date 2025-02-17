@@ -6,7 +6,6 @@ const emit = defineEmits(["sesionCerrada"])
 
 const props = defineProps({
   datosUsuario: Object,
-  title: String,
   usuarioAutenticado: Object
 })
 
@@ -67,7 +66,7 @@ function cerrarSesion() {
           <!-- User info and logout button if authenticated -->
           <li v-if="usuarioAutenticado" class="nav-item d-flex align-items-center">
             <span class="navbar-text me-3">
-              Bienvenido, {{ usuarioAutenticado.usuario }} ({{ usuarioAutenticado.rol }})
+              Bienvenido, {{ usuarioAutenticado.nombre }} ({{ usuarioAutenticado.rol }})
             </span>
             <!-- Logout button directly in the navbar -->
             <button @click="cerrarSesion" class="btn btn-danger ms-2">Cerrar Sesión</button>

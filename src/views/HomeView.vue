@@ -1,4 +1,5 @@
 <script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
 import Banner from '../components/Banner.vue';
 
 let preguntas = [
@@ -24,27 +25,123 @@ let preguntas = [
   },
 ]
 
+const videoRef = ref(null);
+const isPlaying = ref(false);
+const isMuted = ref(false);
+
+const updatePlayingState = () => {
+  if (videoRef.value) {
+    isPlaying.value = !videoRef.value.paused;
+  }
+};
+
+const playPauseToggle = () => {
+  if (videoRef.value) {
+    if (videoRef.value.paused) {
+      videoRef.value.play();
+    } else {
+      videoRef.value.pause();
+    }
+  }
+};
+
+const restartVideo = () => {
+  if (videoRef.value) {
+    videoRef.value.currentTime = 0;
+    videoRef.value.play();
+  }
+};
+
+const skipForward = () => {
+  if (videoRef.value) {
+    videoRef.value.currentTime += 5;
+  }
+};
+
+const skipBackward = () => {
+  if (videoRef.value) {
+    videoRef.value.currentTime -= 5;
+  }
+};
+
+const volumeUp = () => {
+  if (videoRef.value) {
+    videoRef.value.volume = Math.min(videoRef.value.volume + 0.1, 1);
+  }
+};
+
+const volumeDown = () => {
+  if (videoRef.value) {
+    videoRef.value.volume = Math.max(videoRef.value.volume - 0.1, 0);
+  }
+};
+
+const toggleMute = () => {
+  if (videoRef.value) {
+    videoRef.value.muted = !videoRef.value.muted;
+    isMuted.value = videoRef.value.muted;
+  }
+};
+
+onMounted(() => {
+  if (videoRef.value) {
+    videoRef.value.addEventListener('play', updatePlayingState);
+    videoRef.value.addEventListener('pause', updatePlayingState);
+  }
+});
+
+onUnmounted(() => {
+  if (videoRef.value) {
+    videoRef.value.removeEventListener('play', updatePlayingState);
+    videoRef.value.removeEventListener('pause', updatePlayingState);
+  }
+});
+
 </script>
 <template>
-  <Banner />
+  <Banner/>
   <!--Quién Somos-->
   <div class="container my-5">
-    <div class="row d-flex align-items-center justify-content-between">
-      <div class="col-md-6">
-        <h2>¿Quiénes Somos?</h2>
-        <p class="lh-lg">
-          En Viajes Quinto Pino, ofrecemos free tours con guías locales <br>
-          apasionados que combinan historia, cultura y entretenimiento. <br>
-          Creemos en un turismo accesible y auténtico, donde tú decides <br>
-          el valor de la experiencia. Únete a nuestros recorridos y descubre <br>
-          lugares de una manera única.
-        </p>
-      </div>
-      <div class="col-md-6">
-        <video id="videoControles" class="img-fluid" controls>
-          <source src="../assets/images/video.mp4" type="video/mp4">
-          Tu navegador no soporta el elemento de video.
-        </video>
+    <div class="container my-5">
+      <div class="row align-items-center">
+        <div class="col-md-6">
+          <h2>¿Quiénes Somos?</h2>
+          <p class="lh-lg">
+            En Viajes Quinto Pino, ofrecemos free tours con guías locales <br>
+            apasionados que combinan historia, cultura y entretenimiento. <br>
+            Creemos en un turismo accesible y auténtico, donde tú decides <br>
+            el valor de la experiencia. Únete a nuestros recorridos y descubre <br>
+            lugares de una manera única.
+          </p>
+        </div>
+        <div class="col-md-6">
+          <div class="position-relative">
+            <video ref="videoRef" class="img-fluid rounded w-100">
+              <source src="../assets/images/video.mp4" type="video/mp4">
+              Tu navegador no soporta el elemento de video.
+            </video>
+            <!-- Controles superpuestos sobre el video -->
+            <div class="position-absolute bottom-0 start-0 w-100 p-2">
+              <div class="d-flex justify-content-center mb-2">
+                <div class="btn-group me-2" role="group" aria-label="Controles de reproducción">
+                  <button type="button" class="btn btn-light" @click="skipBackward">-5s</button>
+                  <button type="button" class="btn btn-light" @click="playPauseToggle">
+                    <span v-if="isPlaying">⏸️</span>
+                    <span v-else>▶️</span>
+                  </button>
+                  <button type="button" class="btn btn-light" @click="skipForward">+5s</button>
+                  <button type="button" class="btn btn-light" @click="restartVideo">Reiniciar</button>
+                  <button type="button" class="btn btn-light" @click="volumeDown">Vol -</button>
+                  <button type="button" class="btn btn-light" @click="toggleMute">
+                    <span v-if="isMuted">🔇</span>
+                    <span v-else>🔊</span>
+                  </button>
+                  <button type="button" class="btn btn-light" @click="volumeUp">Vol +</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -90,32 +187,38 @@ let preguntas = [
   <!--Tarjetas Información-->
   <div class="container mt-4 mt-5">
     <div class="row text-center">
-        <div class="col-sm-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="fs-3 text-decoration-underline">¿Por qué elegirnos?</h5>
-                    <p class="card-text">En Viajes Quinto Pino nos apasiona ofrecerte una experiencia única. Nos destacamos por la calidad de nuestros tours y el compromiso con cada viajero, asegurándonos de que cada recorrido sea memorable y auténtico.</p>
-                </div>
-            </div>
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="fs-3 text-decoration-underline">¿Por qué elegirnos?</h5>
+            <p class="card-text">En Viajes Quinto Pino nos apasiona ofrecerte una experiencia única. Nos destacamos
+              por la calidad de nuestros tours y el compromiso con cada viajero, asegurándonos de que cada recorrido
+              sea memorable y auténtico.</p>
+          </div>
         </div>
-        <div class="col-sm-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="fs-3 text-decoration-underline">Nuestros guías</h5>
-                    <p class="card-text">Nuestros guías son expertos locales, apasionados por compartir historias, cultura y tradiciones de la ciudad. Son personas amigables, dinámicas y siempre dispuestas a ofrecer una experiencia cercana y enriquecedora.</p>
-                </div>
-            </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="fs-3 text-decoration-underline">Nuestros guías</h5>
+            <p class="card-text">Nuestros guías son expertos locales, apasionados por compartir historias, cultura y
+              tradiciones de la ciudad. Son personas amigables, dinámicas y siempre dispuestas a ofrecer una
+              experiencia cercana y enriquecedora.</p>
+          </div>
         </div>
-        <div class="col-sm-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="fs-3 text-decoration-underline">Sostenibilidad</h5>
-                    <p class="card-text">Nos importa el medio ambiente y el impacto que generamos. Promovemos prácticas responsables y sostenibles en todos nuestros tours para que puedas disfrutar de tu experiencia mientras cuidamos juntos nuestro planeta.</p>
-                </div>
-            </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="fs-3 text-decoration-underline">Sostenibilidad</h5>
+            <p class="card-text">Nos importa el medio ambiente y el impacto que generamos. Promovemos prácticas
+              responsables y sostenibles en todos nuestros tours para que puedas disfrutar de tu experiencia mientras
+              cuidamos juntos nuestro planeta.</p>
+          </div>
         </div>
+      </div>
     </div>
-</div>
+  </div>
 
   <!--Preguntas Frecuentes-->
   <div class="container mt-4 mb-5">
