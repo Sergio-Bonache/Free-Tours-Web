@@ -42,7 +42,7 @@ async function iniciarSesion() {
             <div class="col-lg-6">
               <div class="p-5">
                 <div class="mb-5">
-                  <h3 class="h4 fw-bold text-success">Login</h3>
+                  <h3 class="h4 fw-bold text-success">Iniciar Sesión</h3>
                 </div>
                 <h6 class="h5 mb-0">¡Bienvenido de nuevo!</h6>
                 <p class="text-muted mt-2 mb-5">

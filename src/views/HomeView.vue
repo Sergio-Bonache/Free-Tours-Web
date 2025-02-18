@@ -25,75 +25,75 @@ let preguntas = [
   },
 ]
 
-const videoRef = ref(null);
-const isPlaying = ref(false);
-const isMuted = ref(false);
+const video = ref(null);
+const estaActivo = ref(false);
+const estaSilenciado = ref(false);
 
-const updatePlayingState = () => {
-  if (videoRef.value) {
-    isPlaying.value = !videoRef.value.paused;
+const cambiarEstadoVideo = () => {
+  if (video.value) {
+    estaActivo.value = !video.value.paused;
   }
 };
 
-const playPauseToggle = () => {
-  if (videoRef.value) {
-    if (videoRef.value.paused) {
-      videoRef.value.play();
+const cambioPausarVer = () => {
+  if (video.value) {
+    if (video.value.paused) {
+      video.value.play();
     } else {
-      videoRef.value.pause();
+      video.value.pause();
     }
   }
 };
 
-const restartVideo = () => {
-  if (videoRef.value) {
-    videoRef.value.currentTime = 0;
-    videoRef.value.play();
+const reiniciarVideo = () => {
+  if (video.value) {
+    video.value.currentTime = 0;
+    video.value.play();
   }
 };
 
-const skipForward = () => {
-  if (videoRef.value) {
-    videoRef.value.currentTime += 5;
+const sumarSeg = () => {
+  if (video.value) {
+    video.value.currentTime += 5;
   }
 };
 
-const skipBackward = () => {
-  if (videoRef.value) {
-    videoRef.value.currentTime -= 5;
+const restarSeg = () => {
+  if (video.value) {
+    video.value.currentTime -= 5;
   }
 };
 
-const volumeUp = () => {
-  if (videoRef.value) {
-    videoRef.value.volume = Math.min(videoRef.value.volume + 0.1, 1);
+const subirVol = () => {
+  if (video.value) {
+    video.value.volume = Math.min(video.value.volume + 0.1, 1);
   }
 };
 
-const volumeDown = () => {
-  if (videoRef.value) {
-    videoRef.value.volume = Math.max(videoRef.value.volume - 0.1, 0);
+const bajarVol = () => {
+  if (video.value) {
+    video.value.volume = Math.max(video.value.volume - 0.1, 0);
   }
 };
 
-const toggleMute = () => {
-  if (videoRef.value) {
-    videoRef.value.muted = !videoRef.value.muted;
-    isMuted.value = videoRef.value.muted;
+const cambiarSilenciado = () => {
+  if (video.value) {
+    video.value.muted = !video.value.muted;
+    estaSilenciado.value = video.value.muted;
   }
 };
 
 onMounted(() => {
-  if (videoRef.value) {
-    videoRef.value.addEventListener('play', updatePlayingState);
-    videoRef.value.addEventListener('pause', updatePlayingState);
+  if (video.value) {
+    video.value.addEventListener('play', cambiarEstadoVideo);
+    video.value.addEventListener('pause', cambiarEstadoVideo);
   }
 });
 
 onUnmounted(() => {
-  if (videoRef.value) {
-    videoRef.value.removeEventListener('play', updatePlayingState);
-    videoRef.value.removeEventListener('pause', updatePlayingState);
+  if (video.value) {
+    video.value.removeEventListener('play', cambiarEstadoVideo);
+    video.value.removeEventListener('pause', cambiarEstadoVideo);
   }
 });
 
@@ -116,7 +116,7 @@ onUnmounted(() => {
         </div>
         <div class="col-md-6">
           <div class="position-relative">
-            <video ref="videoRef" class="img-fluid rounded w-100">
+            <video ref="video" class="img-fluid rounded w-100">
               <source src="../assets/images/video.mp4" type="video/mp4">
               Tu navegador no soporta el elemento de video.
             </video>
@@ -124,19 +124,19 @@ onUnmounted(() => {
             <div class="position-absolute bottom-0 start-0 w-100 p-2">
               <div class="d-flex justify-content-center mb-2">
                 <div class="btn-group me-2" role="group" aria-label="Controles de reproducción">
-                  <button type="button" class="btn btn-light" @click="skipBackward">-5s</button>
-                  <button type="button" class="btn btn-light" @click="playPauseToggle">
-                    <span v-if="isPlaying">⏸️</span>
+                  <button type="button" class="btn btn-light" @click="restarSeg">-5s</button>
+                  <button type="button" class="btn btn-light" @click="cambioPausarVer">
+                    <span v-if="estaActivo">⏸️</span>
                     <span v-else>▶️</span>
                   </button>
-                  <button type="button" class="btn btn-light" @click="skipForward">+5s</button>
-                  <button type="button" class="btn btn-light" @click="restartVideo">Reiniciar</button>
-                  <button type="button" class="btn btn-light" @click="volumeDown">Vol -</button>
-                  <button type="button" class="btn btn-light" @click="toggleMute">
-                    <span v-if="isMuted">🔇</span>
+                  <button type="button" class="btn btn-light" @click="sumarSeg">+5s</button>
+                  <button type="button" class="btn btn-light" @click="reiniciarVideo">Reiniciar</button>
+                  <button type="button" class="btn btn-light" @click="bajarVol">Vol -</button>
+                  <button type="button" class="btn btn-light" @click="cambiarSilenciado">
+                    <span v-if="estaSilenciado">🔇</span>
                     <span v-else>🔊</span>
                   </button>
-                  <button type="button" class="btn btn-light" @click="volumeUp">Vol +</button>
+                  <button type="button" class="btn btn-light" @click="subirVol">Vol +</button>
                 </div>
               </div>
             </div>

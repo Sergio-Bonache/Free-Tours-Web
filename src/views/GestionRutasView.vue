@@ -3,5 +3,5 @@
 </script>
 
 <template>
-    <h1>Hola soy el rutas Disponibles View</h1>
+    <h1>Hola soy Gestion Rutas (Admin)</h1>
 </template>
