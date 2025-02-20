@@ -100,6 +100,17 @@ onUnmounted(() => {
 </script>
 <template>
   <Banner/>
+  <!--Buscador rutas-->
+  <div class="container my-4 text-center">
+    <h2 class="mb-3">Busca tu próxima aventura</h2>
+    <div class="d-flex justify-content-center">
+      <div class="input-group w-75 mt-3 shadow">
+        <input v-model="busqueda" type="text" class="form-control" placeholder="Buscar ruta..." />
+        <input v-model="fecha" type="date" class="form-control" />
+        <button class="btn btn-success fs-5" @click="buscarRuta">Buscar ruta</button>
+      </div>
+    </div>
+  </div>
   <!--Quién Somos-->
   <div class="container my-5">
     <div class="container my-5">

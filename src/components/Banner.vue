@@ -19,7 +19,7 @@
     position: relative;
     width: 100%;
     min-height: 400px; 
-    height: 400px; /* Ajusta la altura de acuerdo a tus necesidades */
+    height: 400px; 
     overflow: hidden;
   }
   
@@ -29,7 +29,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('../assets/images/banner.jpeg'); /* Pon la URL de tu imagen */
+    background-image: url('../assets/images/banner.jpeg'); 
     background-size: cover;
     background-position: center;
   }
