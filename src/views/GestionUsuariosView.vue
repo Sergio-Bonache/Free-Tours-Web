@@ -67,7 +67,7 @@ onMounted(() => {
 
 <template>
   <div class="container my-5">
-    <h1 class="mb-4">Administración de Usuarios</h1>
+    <h2 class="mb-4">Administración de Usuarios</h2>
     <div class="table-responsive shadow">
       <table class="table table-striped table-bordered table-hover align-middle">
         <thead class="table-dark">

@@ -52,7 +52,7 @@ function cerrarSesion() {
           </li>
           <li v-if="datosUsuario?.rol == 'admin'" class="nav-item">
             <RouterLink class="nav-link fs-5" to="/gestionUsuarios">Gestionar Usuarios</RouterLink>
-          </li>
+          </li> 
           
           <!--Botones de login y signup si el usuario no está logueado-->
           <li class="nav-item ps-4" v-if="!usuarioAutenticado">
