@@ -13,17 +13,19 @@ const formData = ref({
   latitud: '',
   longitud: '',
   puntoEncuentro: '',
-  guia: ''
+  guia_id: ''
 });
 
 let fechaMomentoCreacion = new Date().toISOString().split('T')[0];
 
 
-//Variables reactivas para mostrar los modales
+//Variables para mostrar los modales
 const mostrarModalUbicacionNoEncontrada = ref(false);
 const mostrarModalCamposIncompletos = ref(false);
+const mostrarModalRutaCreada = ref(false);
 
-let map, marker;
+let map
+let marker;
 
 onMounted(() => {
   map = L.map('map').setView([50.84772403093738, 4.353098372274874], 13); //Punto inicial en Bruselas
@@ -54,7 +56,6 @@ const searchLocation = async () => {
       .openPopup();
     map.setView([lat, lon], 13);
   } else {
-    //En lugar de crear el modal aquí, se activa la variable reactiva
     mostrarModalUbicacionNoEncontrada.value = true;
   }
 };
@@ -70,19 +71,18 @@ function comprobarFormulario() {
     !formData.value.latitud ||
     !formData.value.longitud
   ) {
-    //Se activa la variable para mostrar el modal de campos incompletos
     mostrarModalCamposIncompletos.value = true;
     return false;
   }
-
   return true;
 }
 
 const enviarDatosFormulario = () => {
   if (comprobarFormulario()) {
-    //Modificamos los datos necesarios como fecha y hora.
+    //Modificamos la hora para que concuerde con el formato de la base de datos.
     let horaConSegundos = formData.value.hora + ":00";
-    //Llamamos a la API y creamos la ruta.
+
+    //Llamamos a la API.
     const datosNuevaRuta = {
       titulo: formData.value.titulo,
       localidad: formData.value.localidad,
@@ -92,9 +92,10 @@ const enviarDatosFormulario = () => {
       hora: horaConSegundos,
       latitud: formData.value.latitud,
       longitud: formData.value.longitud,
+      guia_id: formData.value.guia_id
     };
 
-    // Llamada a la API para crear la ruta
+    // Llamamos a la API y creamos la ruta.
     fetch("http://localhost/freetours/api.php/rutas", {
       method: "POST",
       headers: {
@@ -102,20 +103,20 @@ const enviarDatosFormulario = () => {
       },
       body: JSON.stringify(datosNuevaRuta)
     })
-    .then(res => res.json())
-    .then(data => {
-      console.log("Respuesta de la API:", data);
-      if(data.status === "success"){
-         // Por ejemplo, se puede limpiar el formulario si la creación fue exitosa
-         vaciarFormulario();
-      } else {
-         // Se puede notificar el error o advertencia
-         alert(data.message);
-      }
-    })
-    .catch(error => {
-      console.error("Error al crear la ruta:", error);
-    });
+      .then(res => res.json())
+      .then(data => {
+        console.log("Respuesta de la API:", data);
+        if (data.status === "success") {
+          //Si la ruta se crea mostramos un modal indicando que se ha creado la ruta y vaciamos el formulario.
+          mostrarModalRutaCreada.value = true;
+          vaciarFormulario();
+        }
+      })
+      .catch(error => {
+        console.error("Error al crear la ruta:", error);
+      });
+
+
   }
 };
 
@@ -129,7 +130,7 @@ function vaciarFormulario() {
   formData.value.latitud = '';
   formData.value.longitud = '';
   formData.value.puntoEncuentro = '';
-  formData.value.guia = '';
+  formData.value.guia_id = '';
 
   if (marker) {
     marker.remove();
@@ -138,21 +139,20 @@ function vaciarFormulario() {
 
   map.setView([50.84772403093738, 4.353098372274874], 13); //Restablece el punto inicial a Bruselas
 }
-const guias = ref([]);
+const guiasDisponibles = ref([]);
 
-async function obtenerGuias() {
-  try {
-    const respuesta = await fetch('http://localhost/freetours/api.php/usuarios');
-    const datos = await respuesta.json();
-    guias.value = datos.filter(u => u.rol.toLowerCase() == 'guia');
-  } catch (error) {
-    console.error("Error al obtener guias:", error);
-  }
+function obtenerGuiasDisponibles() {
+  fetch(`http://localhost/freetours/api.php/asignaciones?fecha=${formData.value.fecha}`, {
+    method: 'GET',
+  })
+    .then(response => response.json())
+    .then(data => guiasDisponibles.value = data)
+    .catch(error => console.error('Error:', error));
 }
 
-onMounted(() => {
-  obtenerGuias();
-});
+function obtenerNombreGuiaPorId(guiaId) {
+  //Esta funcion se usará desde el {{texto}} del option, pasandole el guia_id de ese guia.
+}
 </script>
 
 <template>
@@ -195,20 +195,21 @@ onMounted(() => {
           <div class="row mb-3">
             <div class="col">
               <label for="fecha" class="form-label">Fecha❗</label>
-              <input type="date" class="form-control" :min="fechaMomentoCreacion" id="fecha" v-model="formData.fecha" />
+              <input type="date" class="form-control" @change="obtenerGuiasDisponibles()" :min="fechaMomentoCreacion" id="fecha" v-model="formData.fecha" />
             </div>
             <div class="col">
               <label for="hora" class="form-label">Hora❗</label>
-              <input type="time" class="form-control" id="hora" v-model="formData.hora" />
+              <input type="time" class="form-control" step="1800" id="hora" min="09:00" max="21:00"
+                v-model="formData.hora" />
             </div>
           </div>
 
           <!-- Guía -->
           <div class="mb-3">
             <label for="guia" class="form-label">Guía</label>
-            <select class="form-control" id="guia" v-model="formData.guia">
+            <select class="form-control" id="guia" v-model="formData.guia_id">
               <option value="" disabled>Seleccione un guía</option>
-              <option v-for="guia in guias" :key="guia.id" :value="guia.id">{{ guia.nombre }}</option>
+              <option v-for="guia in guiasDisponibles" :key="guia.id" :value="guia.id">{{ guia.id }}</option>
               <option value="singuia">Sin guía</option>
             </select>
           </div>
@@ -254,36 +255,64 @@ onMounted(() => {
   </div>
 
   <!-- Modal de ubicación no encontrada (creado en el template) -->
-  <div v-if="mostrarModalUbicacionNoEncontrada" class="modal fade show" id="locationNotFoundModal" tabindex="-1" aria-labelledby="locationNotFoundLabel" aria-hidden="true" style="display: block;">
+  <div v-if="mostrarModalUbicacionNoEncontrada" class="modal fade show" id="locationNotFoundModal" tabindex="-1"
+    aria-labelledby="locationNotFoundLabel" aria-hidden="true" style="display: block;">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="locationNotFoundLabel">Ubicación no encontrada</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="mostrarModalUbicacionNoEncontrada = false"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+            @click="mostrarModalUbicacionNoEncontrada = false"></button>
         </div>
         <div class="modal-body">
           <p>No se ha podido encontrar la ubicación.</p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @click="mostrarModalUbicacionNoEncontrada = false">Cerrar</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
+            @click="mostrarModalUbicacionNoEncontrada = false">Cerrar</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Modal para campos incompletos (creado en el template) -->
-  <div v-if="mostrarModalCamposIncompletos" class="modal fade show" id="incompleteFieldsModal" tabindex="-1" aria-labelledby="incompleteFieldsModalLabel" aria-hidden="true" style="display: block;">
+  <div v-if="mostrarModalCamposIncompletos" class="modal fade show" id="incompleteFieldsModal" tabindex="-1"
+    aria-labelledby="incompleteFieldsModalLabel" aria-hidden="true" style="display: block;">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="incompleteFieldsModalLabel">Campos incompletos</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="mostrarModalCamposIncompletos = false"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+            @click="mostrarModalCamposIncompletos = false"></button>
         </div>
         <div class="modal-body">
           Por favor, complete todos los campos obligatorios.
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @click="mostrarModalCamposIncompletos = false">Cerrar</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
+            @click="mostrarModalCamposIncompletos = false">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para ruta creada -->
+  <div v-if="mostrarModalRutaCreada" class="modal fade show" id="modalRutaCreada" tabindex="-1"
+    aria-labelledby="modalRutaCreadaLabel" aria-hidden="true" style="display: block;">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalRutaCreadaLabel">Ruta Creada</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+            @click="mostrarModalRutaCreada = false"></button>
+        </div>
+        <div class="modal-body d-flex justify-content-center align-items-center flex-column">
+          <img src="../assets/images/success.png" height="100" width="100" alt="imagen de palmera">
+          <p class="mt-3">¡La ruta ha sido creada!</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-success" data-bs-dismiss="modal"
+            @click="mostrarModalRutaCreada = false">Cerrar</button>
         </div>
       </div>
     </div>
