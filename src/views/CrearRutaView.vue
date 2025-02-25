@@ -139,7 +139,6 @@ function vaciarFormulario() {
 
   map.setView([50.84772403093738, 4.353098372274874], 13); //Restablece el punto inicial a Bruselas
 }
-const guiasDisponibles = ref([]);
 
 function obtenerGuiasDisponibles() {
   fetch(`http://localhost/freetours/api.php/asignaciones?fecha=${formData.value.fecha}`, {
@@ -150,9 +149,26 @@ function obtenerGuiasDisponibles() {
     .catch(error => console.error('Error:', error));
 }
 
-function obtenerNombreGuiaPorId(guiaId) {
-  //Esta funcion se usará desde el {{texto}} del option, pasandole el guia_id de ese guia.
+const guiasDisponibles = ref([]);
+
+async function obtenerGuias() {
+  try {
+    const respuesta = await fetch('http://localhost/freetours/api.php/usuarios');
+    const datos = await respuesta.json();
+    guiasDisponibles.value = datos.filter(u => u.rol.toLowerCase() == 'guia');
+  } catch (error) {
+    console.error("Error al obtener guias:", error);
+  }
 }
+
+function obtenerNombreGuiaPorId(guiaId) {
+  const guiaBuscado = guiasDisponibles.value.find(guia => guia.id == guiaId);
+  return guiaBuscado ? guiaBuscado.nombre : '';
+}
+
+onMounted(() => {
+  obtenerGuias();
+});
 </script>
 
 <template>
@@ -205,12 +221,19 @@ function obtenerNombreGuiaPorId(guiaId) {
           </div>
 
           <!-- Guía -->
-          <div class="mb-3">
+          <div class="mb-3" v-if="formData.fecha!= ''">
             <label for="guia" class="form-label">Guía</label>
             <select class="form-control" id="guia" v-model="formData.guia_id">
               <option value="" disabled>Seleccione un guía</option>
-              <option v-for="guia in guiasDisponibles" :key="guia.id" :value="guia.id">{{ guia.id }}</option>
+              <option v-for="guia in guiasDisponibles" :key="guia.id" :value="guia.id"> Guía {{ obtenerNombreGuiaPorId(guia.id) }} con ID: {{ guia.id }}</option>
               <option value="singuia">Sin guía</option>
+            </select>
+          </div>
+
+          <div class="mb-3" v-else>
+            <label for="guia" class="form-label">Guía</label>
+            <select class="form-control" id="guia">
+              <option value="" selected disabled>Seleccione una fecha primero</option>
             </select>
           </div>
 
