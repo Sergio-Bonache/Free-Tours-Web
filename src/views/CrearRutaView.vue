@@ -82,7 +82,6 @@ const enviarDatosFormulario = () => {
     //Modificamos la hora para que concuerde con el formato de la base de datos.
     let horaConSegundos = formData.value.hora + ":00";
 
-    //Llamamos a la API.
     const datosNuevaRuta = {
       titulo: formData.value.titulo,
       localidad: formData.value.localidad,
