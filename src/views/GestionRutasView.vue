@@ -162,7 +162,7 @@ onMounted(() => {
                                 <option v-for="guia in guiasDisponibles" :key="guia.id" :value="guia.id">{{ guia.nombre }}</option>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary">Duplicar</button>
+                        <button type="submit" class="btn btn-success w-100">Duplicar</button>
                     </form>
                 </div>
             </div>
