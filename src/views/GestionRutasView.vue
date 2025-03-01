@@ -1,18 +1,23 @@
 <script setup>
 import { ref, onMounted } from "vue";
 
-const rutas = ref([]);
-const guias = ref([]);
-const guiasDisponibles = ref([]);
-const mostrarModalDuplicarRuta = ref(false);
+
 const formData = ref({
     fecha: "",
     hora: "",
     guia_id: "",
 });
+
+const guias = ref([]);
+const guiasDisponibles = ref([]);
+
+const rutas = ref([]);
 const rutaSeleccionada = ref(null);
-const mostrarModalEliminarRuta = ref(false);
 const rutaAEliminar = ref(null);
+
+const mostrarModalDuplicarRuta = ref(false);
+const mostrarModalEliminarRuta = ref(false);
+
 const errorDuplicarRuta = ref(false);
 
 const obtenerRutas = async () => {

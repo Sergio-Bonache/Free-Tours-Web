@@ -19,7 +19,9 @@ async function iniciarSesion() {
             emit("sesionIniciada", {
                 nombre : usuarioEncontrado.nombre,
                 email:usuarioEncontrado.email,
-                rol: usuarioEncontrado.rol
+                rol: usuarioEncontrado.rol,
+                id: usuarioEncontrado.id
+
             })
             error.value = '';
             router.push("/");
