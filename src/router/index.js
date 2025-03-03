@@ -9,6 +9,7 @@ import MisRutasView from '../views/MisRutasView.vue'
 import CrearRutaView from '../views/CrearRutaView.vue'
 import GestionRutasView from '../views/GestionRutasView.vue'
 import GestionUsuariosView from '../views/GestionUsuariosView.vue'
+import RutaEspecifica from '../views/RutaEspecifica.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -69,6 +70,12 @@ const router = createRouter({
       name: 'gestionusuarios',
       component: GestionUsuariosView
     },
+    {
+      path: '/ruta/:id',
+      name: 'rutaEspecifica',
+      component: RutaEspecifica,
+      props: true 
+    }
   ],
 })
 
