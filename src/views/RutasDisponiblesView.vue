@@ -1,7 +1,13 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import router from "@/router";
+
 const rutas = ref([]);
+const mostrarModalReserva = ref(false);
+const mostrarModalExito = ref(false);
+const rutaSeleccionada = ref(null);
+const numPersonas = ref(1);
+const emailCliente = ref(localStorage.getItem("sesion") ? JSON.parse(localStorage.getItem("sesion")).email : ""); // Obtener el email del cliente desde localStorage
 
 const obtenerRutas = async () => {
     try {
@@ -10,10 +16,40 @@ const obtenerRutas = async () => {
         );
         const data = await response.json();
         rutas.value = data.filter(
-            (ruta) => ruta.fecha >= new Date().toISOString().split("T")[0]
+            (ruta) => ruta.fecha >= new Date().toISOString().split("T")[0] && ruta.guia_id != null
         ).sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
     } catch (error) {
         console.error("Error al obtener rutas:", error);
+    }
+};
+
+const realizarReserva = (ruta) => {
+    rutaSeleccionada.value = ruta;
+    mostrarModalReserva.value = true;
+};
+
+const confirmarReserva = async () => {
+    const reservaData = {
+        email: emailCliente.value,
+        ruta_id: rutaSeleccionada.value.id,
+        num_personas: numPersonas.value
+    };
+
+    try {
+        const response = await fetch('http://localhost/freetours/api.php/reservas', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(reservaData)
+        });
+        const data = await response.json();
+        console.log('Respuesta:', data);
+        mostrarModalReserva.value = false;
+        mostrarModalExito.value = true;
+    } catch (error) {
+        console.error('Error al realizar la reserva:', error);
+        alert('Error al realizar la reserva');
     }
 };
 
@@ -44,7 +80,7 @@ onMounted(() => {
                     <div class="card-footer p-0">
                         <div class="row g-0 text-center">
                             <div class="col-7">
-                                <button class="btn btn-success fw-bold fs-5 btn-sm w-100 rounded-0 border-0 footer">
+                                <button @click="realizarReserva(ruta)" class="btn btn-success fw-bold fs-5 btn-sm w-100 rounded-0 border-0 footer">
                                     ¡Reservar ahora!
                                 </button>
                             </div>
@@ -57,6 +93,43 @@ onMounted(() => {
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para seleccionar el número de asistentes -->
+    <div v-if="mostrarModalReserva" class="modal fade show" style="display: block;" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Seleccionar número de asistentes</h5>
+                    <button type="button" class="btn-close" @click="mostrarModalReserva = false"></button>
+                </div>
+                <div class="modal-body">
+                    <form @submit.prevent="confirmarReserva()">
+                        <div class="mb-3">
+                            <label for="numPersonas" class="form-label">Número de asistentes</label>
+                            <input type="number" id="numPersonas" v-model="numPersonas" class="form-control" min="1" max="8" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Confirmar Reserva</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para mostrar el éxito de la reserva -->
+    <div v-if="mostrarModalExito" class="modal fade show" style="display: block;" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">¡Reserva realizada con éxito!</h5>
+                    <button type="button" class="btn-close" @click="mostrarModalExito = false"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Su reserva ha sido realizada con éxito.</p>
+                    <button type="button" class="btn btn-success w-100" @click="mostrarModalExito = false">Cerrar</button>
                 </div>
             </div>
         </div>
@@ -82,5 +155,9 @@ onMounted(() => {
 
 .efectoHover:hover {
     transform: translateY(-5px);
+}
+
+.modal {
+    background-color: rgba(0, 0, 0, 0.5);
 }
 </style>

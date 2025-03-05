@@ -21,6 +21,7 @@ function cerrarSesion() {
       <RouterLink class="navbar-brand" to="/">
         <img src="../assets/images/palmera-fondo-verde.png" alt="Home" height="50">
       </RouterLink>
+      <h3 class="text-secondary mt-2 fw-bold" @click="router.push('/')">Viajes Quinto Pino</h3>
 
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
