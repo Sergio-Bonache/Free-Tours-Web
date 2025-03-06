@@ -2,6 +2,13 @@
 import { ref, onMounted } from "vue";
 import router from "@/router";
 
+const sesion = localStorage.getItem("sesion");
+const rol = sesion ? JSON.parse(sesion).rol : null;
+
+/*if (rol != "cliente") {
+  router.push("/");
+}*/
+
 const rutas = ref([]);
 const mostrarModalReserva = ref(false);
 const mostrarModalExito = ref(false);
@@ -80,8 +87,11 @@ onMounted(() => {
                     <div class="card-footer p-0">
                         <div class="row g-0 text-center">
                             <div class="col-7">
-                                <button @click="realizarReserva(ruta)" class="btn btn-success fw-bold fs-5 btn-sm w-100 rounded-0 border-0 footer">
+                                <button v-if="rol == 'cliente'" @click="realizarReserva(ruta)" class="btn btn-success fw-bold fs-5 btn-sm w-100 rounded-0 border-0 footer">
                                     ¡Reservar ahora!
+                                </button>
+                                <button v-else @click="router.push('/login')" class="btn btn-success fw-bold fs-5 btn-sm w-100 rounded-0 border-0 footer">
+                                    ¡Inicia sesión para reservar!
                                 </button>
                             </div>
                             <div class="col-5">

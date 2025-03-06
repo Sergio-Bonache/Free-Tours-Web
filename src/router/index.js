@@ -10,6 +10,7 @@ import CrearRutaView from '../views/CrearRutaView.vue'
 import GestionRutasView from '../views/GestionRutasView.vue'
 import GestionUsuariosView from '../views/GestionUsuariosView.vue'
 import RutaEspecifica from '../views/RutaEspecifica.vue';
+import NotFound from '../views/NotFound.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -74,7 +75,12 @@ const router = createRouter({
       path: '/ruta/:id',
       name: 'rutaEspecifica',
       component: RutaEspecifica,
-      props: true 
+      props: true
+    },
+    { 
+      path: '/:pathMatch(.*)*', 
+      name: 'NotFound', 
+      component: NotFound 
     }
   ],
 })

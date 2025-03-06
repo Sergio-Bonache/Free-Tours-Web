@@ -1,8 +1,12 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import router from "@/router";
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+
+const sesion = localStorage.getItem("sesion");
+const rol = sesion ? JSON.parse(sesion).rol : null;
 
 const route = useRoute();
 const ruta = ref(null);
@@ -104,9 +108,9 @@ onMounted(() => {
         </div>
         <div class="row mt-3">
           <div class="col-md-12">
-            <button class="btn btn-success w-100 fw-bold" @click="realizarReserva">Reservar</button>
+            <button v-if="rol == 'cliente'" class="btn btn-success w-100 fw-bold fs-5" @click="realizarReserva">¡Reservar!</button>
+            <button v-else class="btn btn-success w-100 fw-bold" @click="router.push('/login')">¡Inicia sesión para reservar!</button>
           </div>
-          
         </div>
       </div>
     </div>
