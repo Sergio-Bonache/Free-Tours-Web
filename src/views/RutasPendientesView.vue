@@ -26,6 +26,23 @@ const filtrarRutasPendientes = () => {
     rutasPendientes.value = reservas.value.filter(reserva => new Date(reserva.ruta_fecha) >= hoy);
 };
 
+const actualizarAsistentes = async (reserva, numPersonas) => {
+    try {
+        const response = await fetch(`http://localhost/freetours/api.php/reservas?id=${reserva.reserva_id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ num_personas: numPersonas })
+        });
+        const data = await response.json();
+        console.log('Respuesta:', data);
+        obtenerReservas();
+    } catch (error) {
+        console.error('Error al actualizar el número de asistentes:', error);
+    }
+};
+
 const cancelarRuta = (reserva) => {
     reservaSeleccionada.value = reserva;
     mostrarModalCancelacion.value = true;
@@ -33,7 +50,7 @@ const cancelarRuta = (reserva) => {
 
 const confirmarCancelacion = async () => {
     try {
-        const response = await fetch(`http://localhost/freetours/api.php/reservas?id=${reservaSeleccionada.value.id}`, {
+        const response = await fetch(`http://localhost/freetours/api.php/reservas?id=${reservaSeleccionada.value.reserva_id}`, {
             method: 'DELETE',
         });
         const data = await response.json();
@@ -77,16 +94,12 @@ onMounted(() => {
                         <div class="card-footer p-0">
                             <div class="row g-0 text-center">
                                 <div class="col-8">
-                                    <select class="form-select form-select-sm fw-bolder fs-5 text-center bg-light w-100 rounded-0 border-0 footer">
+                                    <select 
+                                        class="form-select form-select-sm fw-bolder fs-5 text-center bg-light w-100 rounded-0 border-0 footer"
+                                        @change="actualizarAsistentes(reserva, $event.target.value)"
+                                    >
                                         <option selected disabled>Asistentes: {{ reserva.num_personas }}</option>
-                                        <option value="1">1</option>
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
-                                        <option value="5">5</option>
-                                        <option value="6">6</option>
-                                        <option value="7">7</option>
-                                        <option value="8">8</option>
+                                        <option v-for="n in 8" :key="n" :value="n">Asistentes: {{ n }}</option>
                                     </select>
                                 </div>
                                 <div class="col-4">
