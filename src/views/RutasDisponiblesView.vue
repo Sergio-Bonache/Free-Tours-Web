@@ -33,6 +33,7 @@ const obtenerRutas = async () => {
 const realizarReserva = (ruta) => {
     rutaSeleccionada.value = ruta;
     mostrarModalReserva.value = true;
+    console.log(ruta);
 };
 
 const confirmarReserva = async () => {

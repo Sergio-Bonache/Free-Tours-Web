@@ -4,8 +4,12 @@ import { ref, onMounted } from 'vue';
 const emailCliente = ref(localStorage.getItem("sesion") ? JSON.parse(localStorage.getItem("sesion")).email : "");
 const reservas = ref([]);
 const rutasRealizadas = ref([]);
-const reservaSeleccionada = ref(null);
-const calificacion = ref(0);
+const calificacion = ref(1);
+
+const mostrarModalConfirmarValoracion = ref(false);
+const mostrarModalValoracionHecha = ref(false);
+
+let error = ref('');
 
 const obtenerReservas = async () => {
     try {
@@ -38,6 +42,10 @@ const decrementarCalificacion = () => {
     }
 };
 
+const mostrarModalValoracion = () => {
+    mostrarModalConfirmarValoracion.value = true;
+}
+
 const enviarCalificacion = async (reserva) => {
     try {
         const response = await fetch(`http://localhost/freetours/api.php/valoraciones`, {
@@ -53,7 +61,10 @@ const enviarCalificacion = async (reserva) => {
         });
         const data = await response.json();
         console.log('Respuesta:', data);
+        error = data.message;
         obtenerReservas();
+        mostrarModalConfirmarValoracion.value = false;
+        mostrarModalValoracionHecha.value = true;
     } catch (error) {
         console.error('Error al calificar la ruta:', error);
     }
@@ -90,27 +101,69 @@ onMounted(() => {
                         </div>
                         <div class="card-footer p-0">
                             <div class="row g-0 text-center">
-                                <div class="col-4 d-flex align-items-center justify-content-center">
-                                    <p class="fw-bold fs-5 mb-0">Calificar Ruta:</p>
+                                <div class="col-3">
+                                <div class="fw-bold fs-5 w-100 rounded-0 border-0 footer">
+                                    <p class="mt-3">Calificar ruta</p>
                                 </div>
-                                <div class="col-1 d-flex align-items-center justify-content-center">
-                                    <button @click="decrementarCalificacion" class="btn btn-secondary btn-sm">-</button>
-                                </div>
+                            </div>
+                            <div class="col-1">
+                                <button @click="decrementarCalificacion" class="btn bg-success fw-bold fs-5 btn-sm w-100 h-100 text-light rounded-0 border-0 footer">-</button>
+                            </div>
                                 <div class="col-3 d-flex align-items-center justify-content-center">
                                     <span class="mx-2">
-                                        <span v-for="n in calificacion" :key="n" class="text-warning">★</span>
-                                        <span v-for="n in (5 - calificacion)" :key="n" class="text-muted">★</span>
+                                        <span v-for="n in calificacion" :key="n" class="text-warning fs-4">★</span>
+                                        <span v-for="n in (5 - calificacion)" :key="n" class="text-muted fs-4">★</span>
                                     </span>
                                 </div>
                                 <div class="col-1 d-flex align-items-center justify-content-center">
-                                    <button @click="incrementarCalificacion" class="btn btn-secondary btn-sm">+</button>
+                                    <button @click="incrementarCalificacion" class="btn bg-success fw-bold fs-5 btn-sm w-100 h-100 text-light border-end rounded-0 border-0 footer">+</button>
                                 </div>
-                                <div class="col-3 d-flex align-items-center justify-content-center">
-                                    <button @click="enviarCalificacion(reserva)" class="btn btn-primary btn-sm">Enviar Valoración</button>
+                                <div class="col-4 d-flex align-items-center justify-content-center">
+                                    <button @click="mostrarModalValoracion" class="btn btn-success fw-bold fs-5 btn-sm w-100 h-100 rounded-0 border-0 footer">Enviar Valoración</button>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Modal mostrar confirmación de la valoración-->
+                    <div v-if="mostrarModalConfirmarValoracion" class="modal fade show" style="display: block;" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Confirmar Valoración</h5>
+                                    <button type="button" class="btn-close" @click="mostrarModalConfirmarValoracion = false"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>¿Está seguro de que desea valorar esta ruta?</p>
+                                    <div class="d-flex justify-content-between">
+                                        <button type="button" class="btn btn-success me-2 w-50" @click="enviarCalificacion(reserva)">Confirmar</button>
+                                        <button type="button" class="btn btn-danger ms-2 w-50" @click="mostrarModalConfirmarValoracion = false">Cancelar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal mostrar confirmación de valoración hecha -->
+                    <div v-if="mostrarModalValoracionHecha" class="modal fade show" style="display: block;" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Valoración enviada!</h5>
+                                    <button type="button" class="btn-close" @click="mostrarModalValoracionHecha = false"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>¡{{error}}!</p>
+                                    <div class="d-flex justify-content-between">
+                                        <button type="button" class="btn btn-success me-2 w-100" @click="mostrarModalValoracionHecha = false">Confirmar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    
                 </div>
             </div>
         </div>
@@ -139,7 +192,7 @@ onMounted(() => {
 }
 
 .star {
-    font-size: 2rem;
+    font-size: 12rem;
     cursor: pointer;
 }
 </style>
