@@ -104,12 +104,12 @@ onMounted(() => {
           </div>
         </div>
         <div class="mt-3">
-          <div id="map" class="rounded" style="height: 400px;"></div>
+          <div id="map" class="rounded" style="height: 400px;" aria-label="Mapa de la ruta"></div>
         </div>
         <div class="row mt-3">
           <div class="col-md-12">
-            <button v-if="rol == 'cliente'" class="btn btn-success w-100 fw-bold fs-5" @click="realizarReserva">¡Reservar!</button>
-            <button v-else class="btn btn-success w-100 fw-bold" @click="router.push('/login')">¡Inicia sesión para reservar!</button>
+            <button v-if="rol == 'cliente'" class="btn btn-success w-100 fw-bold fs-5" @click="realizarReserva" aria-label="Reservar">¡Reservar!</button>
+            <button v-else class="btn btn-success w-100 fw-bold" @click="router.push('/login')" aria-label="Iniciar sesión para reservar">¡Inicia sesión para reservar!</button>
           </div>
         </div>
       </div>
@@ -117,20 +117,20 @@ onMounted(() => {
   </div>
 
   <!-- Modal para seleccionar el número de asistentes -->
-  <div v-if="mostrarModalReserva" class="modal fade show" style="display: block;" tabindex="-1">
+  <div v-if="mostrarModalReserva" class="modal fade show" style="display: block;" tabindex="-1" aria-label="Modal de selección de número de asistentes">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Seleccionar número de asistentes</h5>
-          <button type="button" class="btn-close" @click="mostrarModalReserva = false"></button>
+          <button type="button" class="btn-close" @click="mostrarModalReserva = false" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <form @submit.prevent="confirmarReserva()">
             <div class="mb-3">
               <label for="numPersonas" class="form-label">Número de asistentes</label>
-              <input type="number" id="numPersonas" v-model="numPersonas" class="form-control" min="1" max="8" required>
+              <input type="number" id="numPersonas" v-model="numPersonas" class="form-control" min="1" max="8" required aria-label="Número de asistentes">
             </div>
-            <button type="submit" class="btn btn-success w-100">Confirmar Reserva</button>
+            <button type="submit" class="btn btn-success w-100" aria-label="Confirmar reserva">Confirmar Reserva</button>
           </form>
         </div>
       </div>
@@ -138,16 +138,16 @@ onMounted(() => {
   </div>
 
   <!-- Modal para mostrar el éxito de la reserva -->
-  <div v-if="mostrarModalExito" class="modal fade show" style="display: block;" tabindex="-1">
+  <div v-if="mostrarModalExito" class="modal fade show" style="display: block;" tabindex="-1" aria-label="Modal de éxito de reserva">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">¡Reserva realizada con éxito!</h5>
-          <button type="button" class="btn-close" @click="mostrarModalExito = false"></button>
+          <button type="button" class="btn-close" @click="mostrarModalExito = false" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <p>Su reserva ha sido realizada con éxito.</p>
-          <button type="button" class="btn btn-success" @click="mostrarModalExito = false">Cerrar</button>
+          <button type="button" class="btn btn-success" @click="mostrarModalExito = false" aria-label="Cerrar">Cerrar</button>
         </div>
       </div>
     </div>

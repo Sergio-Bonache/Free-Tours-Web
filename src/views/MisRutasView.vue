@@ -1,8 +1,15 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import router from "@/router";
 
+const sesion = localStorage.getItem("sesion");
+const rol = sesion ? JSON.parse(sesion).rol : null;
+
+if (rol != "guia") {
+  router.push("/");
+}
 const rutas = ref([]);
-const usuarioActual = JSON.parse(localStorage.getItem("sesion")); // Simulación del usuario actual
+const usuarioActual = JSON.parse(localStorage.getItem("sesion")); 
 
 function obtenerRutasAsignadas() {
     fetch(`http://localhost/freetours/api.php/rutas?guia_id=${usuarioActual.id}`)
@@ -29,17 +36,17 @@ onMounted(() => {
             <p class="fs-5 fst-italic text-muted">Disfruta de enseñar a los demás lo que te gusta...</p>
             <div class="col-md-6 mb-5" v-for="ruta in rutas" :key="ruta.id">
                 <div class="card h-100 efectoHover bg-light shadow-lg">
-                    <img :src="ruta.foto" class="card-img-top imagenRuta" height="200" :alt="ruta.titulo" />
+                    <img :src="ruta.foto" class="card-img-top imagenRuta" height="200" :alt="ruta.titulo" aria-label="Imagen de la ruta {{ ruta.titulo }}" />
                     <div class="mt-2 bg-light">
                         <h4 class="text-center custom-title text-decoration-underline">
                             {{ ruta.titulo }}
                         </h4>
                         <p class="text-center mb-2">
-                            <img src="../assets/images/location.png" alt="Icono de ubicación" height="20" />
+                            <img src="../assets/images/location.png" alt="Icono de ubicación" height="20" aria-label="Ubicación" />
                             {{ ruta.localidad }}
                         </p>
                         <p class="text-center mb-2 fst-italic">
-                            <img src="../assets/images/clock-ico.png" alt="Icono de ubicación" height="16" />
+                            <img src="../assets/images/clock-ico.png" alt="Icono de reloj" height="16" aria-label="Hora" />
                             {{ ruta.fecha }} - {{ ruta.hora }}
                         </p>
                     </div>

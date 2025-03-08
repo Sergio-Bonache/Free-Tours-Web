@@ -89,24 +89,24 @@ async function registrarUsuario() {
                   <div class="mb-3">
                     <label for="username" class="form-label">Nombre de usuario</label>
                     <input v-model="form.nombreUsuario" type="text" class="form-control" id="username"
-                      placeholder="Ingresa tu nombre de usuario" />
+                      placeholder="Ingresa tu nombre de usuario" aria-label="Nombre de usuario" />
                   </div>
                   <div class="mb-3">
                     <label for="email" class="form-label">Correo electrónico</label>
                     <input v-model="form.email" type="text" class="form-control" id="email"
-                      placeholder="Ingresa tu correo electrónico" />
+                      placeholder="Ingresa tu correo electrónico" aria-label="Correo electrónico" />
                   </div>
                   <div class="mb-3">
                     <label for="password" class="form-label">Contraseña</label>
                     <input v-model="form.password" type="password" class="form-control" id="password"
-                      placeholder="Ingresa tu contraseña" />
+                      placeholder="Ingresa tu contraseña" aria-label="Contraseña" />
                   </div>
                   <p v-if="error" class="text-danger mt-2">{{ error }}</p>
                   <div class="d-grid">
-                    <button type="submit" class="btn btn-success">Registrarse</button>
+                    <button type="submit" class="btn btn-success" aria-label="Registrarse">Registrarse</button>
                   </div>
                   <div class="mt-3 text-center">
-                    <RouterLink to="/login" class="text-success text-decoration-none">¿Ya tienes cuenta? Inicia sesión
+                    <RouterLink to="/login" class="text-success text-decoration-none" aria-label="Inicia sesión">¿Ya tienes cuenta? Inicia sesión
                     </RouterLink>
                   </div>
                 </form>

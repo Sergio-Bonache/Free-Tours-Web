@@ -1,11 +1,20 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
+import router from "@/router";
+
+const sesion = localStorage.getItem("sesion");
+const rol = sesion ? JSON.parse(sesion).rol : null;
+
+if (rol != "cliente") {
+  router.push("/");
+}
 
 const emailCliente = ref(localStorage.getItem("sesion") ? JSON.parse(localStorage.getItem("sesion")).email : "");
 const reservas = ref([]);
 const rutasRealizadas = ref([]);
-const calificacion = ref(1);
-const rutaSeleccionada = ref(null); // Define rutaSeleccionada como un objeto reactivo
+const rutaSeleccionada = ref(null); 
+const estrellasActuales = ref(0);
+
 const mostrarModalConfirmarValoracion = ref(false);
 const mostrarModalValoracionHecha = ref(false);
 
@@ -52,15 +61,15 @@ const filtrarRutasRealizadas = () => {
 };
 
 const incrementarCalificacion = (reserva) => {
-    if (reserva.valoracion < 5) {
-        reserva.valoracion++;
+    if (estrellasActuales.value < 5) {
+        estrellasActuales.value++;
         console.log("ID "+ reserva.ruta_id + ": " +reserva.valoracion);
     }
 };
 
 const decrementarCalificacion = (reserva) => {
-    if (reserva.valoracion > 1) {
-        reserva.valoracion--;
+    if (estrellasActuales.value > 1) {
+        estrellasActuales.value--;
         console.log("ID "+ reserva.ruta_id + ": " +reserva.valoracion);
     }
 };
@@ -77,7 +86,7 @@ const enviarCalificacion = async () => {
     const nuevaValoracion = {
         user_id: rutaSeleccionada.value.cliente_id,
         ruta_id: rutaSeleccionada.value.ruta_id,
-        estrellas: rutaSeleccionada.value.valoracion,
+        estrellas: estrellasActuales.value,
         comentario: rutaSeleccionada.value.comentario // Añade el comentario a la solicitud
     };
 
@@ -138,39 +147,58 @@ onMounted(() => {
                         <div class="card-footer p-0">
                             <div class="row g-0 text-center">
                                 <div class="col-12">
-                                    <div class="fw-bold fs-5 w-100 rounded-0 border-0 footer">
+                                    <div v-if="reserva.valoracion== null" class="bg-success fw-bold text-light fs-5 w-100 rounded-0 border-0 footer">
                                         <p class="mt-3">Calificar ruta</p>
+                                    </div>
+                                    <div v-else class="bg-light text-success fw-bold fs-5 w-100 rounded-0 border-0 footer">
+                                        <p class="mt-3">¡Ya has valorado esta ruta!</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="card-footer p-0">
                             <div class="row g-0 text-center">
-                                <div class="col-6">
-                                    <textarea v-model="reserva.comentario" class="form-control bg-light fs-6 text-break pb-3 rounded-0" rows="3" placeholder="Escribe tu comentario aquí"></textarea>
+                                <div v-if="reserva.valoracion == null" class="col-6">
+                                    <textarea v-model="reserva.comentario" class="form-control bg-light fs-6 text-break pb-3 rounded-0" rows="3" placeholder="Escribe tu comentario aquí" aria-label="Escribe tu comentario aquí"></textarea>
                                 </div>
                                 <div class="col-6">
-                                    <div class="row g-0">
+                                    <div v-if="reserva.valoracion == null" class="row g-0">
                                         <div class="col-12 d-flex align-items-center p-1 justify-content-center">
-                                            <span class="mx-2">
-                                                <span v-for="n in reserva.valoracion" :key="n" class="text-warning fs-4">★</span>
-                                                <span v-for="n in (5 - reserva.valoracion)" :key="n" class="text-muted fs-4">★</span>
+                                            <span class="mx-2" aria-label="Calificación de estrellas">
+                                                <span v-for="n in estrellasActuales" :key="n" class="text-warning fs-4">★</span>
+                                                <span v-for="n in (5 - estrellasActuales)" :key="n" class="text-muted fs-4">★</span>
                                             </span>
                                         </div>
                                         <div class="col-6">
-                                            <button @click="decrementarCalificacion(reserva)" class="btn bg-dark text-light fw-bold pb-1 fs-3 btn-sm w-100 h-100 rounded-0 border-top border-end footer">-</button>
+                                            <button @click="decrementarCalificacion(reserva)" class="btn bg-dark text-light fw-bold pb-1 fs-3 btn-sm w-100 h-100 rounded-0 border-top border-end footer" aria-label="Disminuir calificación">-</button>
                                         </div>
                                         <div class="col-6">
-                                            <button @click="incrementarCalificacion(reserva)" class="btn bg-dark text-light fw-bold pb-1 fs-3 btn-sm w-100 h-100 rounded-0 border-top footer">+</button>
+                                            <button @click="incrementarCalificacion(reserva)" class="btn bg-dark text-light fw-bold pb-1 fs-3 btn-sm w-100 h-100 rounded-0 border-top footer" aria-label="Aumentar calificación">+</button>
+                                        </div>
+                                    </div>
+                                    <div v-else class="row g-0">
+                                        <div class="col-12 mt-3 pb-3">
+                                            <div class="ms-5 d-flex align-items-center">
+                                                <h4 class="text-nowrap mt-2 ps-5 pe-4">Tu valoración:</h4>
+                                                <span v-for="n in reserva.valoracion" :key="n" class="text-warning mb-1 fs-1">★</span>
+                                                <span v-for="n in (5 - reserva.valoracion)" :key="n" class="text-muted mb-1 fs-1">★</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer p-0">
+                        <div v-if="reserva.valoracion == null" class="card-footer p-0">
                             <div class="row g-0 text-center">
                                 <div class="col-12 d-flex align-items-center justify-content-center ">
-                                    <button @click="mostrarModalValoracion(reserva)" class="btn btn-success fw-bold fs-5 btn-sm w-100 h-100 rounded-0 border-0 footer">Enviar Valoración</button>
+                                    <button @click="mostrarModalValoracion(reserva)" class="btn btn-success fw-bold fs-5 btn-sm w-100 h-100 rounded-0 border-0 footer" aria-label="Enviar valoración">Enviar Valoración</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else class="card-footer p-0">
+                            <div class="row g-0 text-center">
+                                <div class="col-12 d-flex align-items-center justify-content-center ">
+                                    <span class="text-success fw-bold fs-5 mt-2 pb-2 w-100 h-100 d-flex align-items-center justify-content-center">Gracias por tu valoración</span>
                                 </div>
                             </div>
                         </div>
@@ -181,14 +209,14 @@ onMounted(() => {
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title">Confirmar Valoración</h5>
-                                    <button type="button" class="btn-close" @click="mostrarModalConfirmarValoracion = false"></button>
+                                    <h5 class="modal-title" id="confirmarValoracionModalLabel">Confirmar Valoración</h5>
+                                    <button type="button" class="btn-close" @click="mostrarModalConfirmarValoracion = false" aria-label="Cerrar"></button>
                                 </div>
                                 <div class="modal-body">
                                     <p>¿Está seguro de que desea valorar esta ruta?</p>
                                     <div class="d-flex justify-content-between">
-                                        <button type="button" class="btn btn-success me-2 w-50" @click="enviarCalificacion">Confirmar</button>
-                                        <button type="button" class="btn btn-danger ms-2 w-50" @click="mostrarModalConfirmarValoracion = false">Cancelar</button>
+                                        <button type="button" class="btn btn-success me-2 w-50" @click="enviarCalificacion" aria-label="Confirmar valoración">Confirmar</button>
+                                        <button type="button" class="btn btn-danger ms-2 w-50" @click="mostrarModalConfirmarValoracion = false" aria-label="Cancelar valoración">Cancelar</button>
                                     </div>
                                 </div>
                             </div>
@@ -200,13 +228,13 @@ onMounted(() => {
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title">Valoración enviada!</h5>
-                                    <button type="button" class="btn-close" @click="mostrarModalValoracionHecha = false"></button>
+                                    <h5 class="modal-title" id="valoracionHechaModalLabel">Valoración enviada!</h5>
+                                    <button type="button" class="btn-close" @click="mostrarModalValoracionHecha = false" aria-label="Cerrar"></button>
                                 </div>
                                 <div class="modal-body">
                                     <p>¡{{error}}!</p>
                                     <div class="d-flex justify-content-between">
-                                        <button type="button" class="btn btn-success me-2 w-100" @click="mostrarModalValoracionHecha = false">Confirmar</button>
+                                        <button type="button" class="btn btn-success me-2 w-100" @click="mostrarModalValoracionHecha = false" aria-label="Confirmar">Confirmar</button>
                                     </div>
                                 </div>
                             </div>

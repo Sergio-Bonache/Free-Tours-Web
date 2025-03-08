@@ -1,6 +1,13 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import router from "@/router";
 
+const sesion = localStorage.getItem("sesion");
+const rol = sesion ? JSON.parse(sesion).rol : null;
+
+if (rol != "admin") {
+  router.push("/");
+}
 
 const formData = ref({
     fecha: "",
@@ -181,20 +188,20 @@ onMounted(() => {
                         <div class="row g-0 text-center">
                             <div class="col-4">
                                 <button @click="abrirModalEliminarRuta(ruta)"
-                                    class="btn btn-danger fw-bold fs-5 btn-sm w-100 rounded-0 border-0 footer">
+                                    class="btn btn-danger fw-bold fs-5 btn-sm w-100 rounded-0 border-0 footer" aria-label="Eliminar ruta">
                                     Eliminar
                                 </button>
                             </div>
                             <div class="col-4">
                                 <button @click="abrirModalDuplicarRuta(ruta)"
-                                    class="btn btn-success fw-bold fs-5 btn-sm w-100 rounded-0 border-0 footer">
+                                    class="btn btn-success fw-bold fs-5 btn-sm w-100 rounded-0 border-0 footer" aria-label="Duplicar ruta">
                                     Duplicar
                                 </button>
                             </div>
                             <div class="col-4">
                                 <select @focus="obtenerGuiasDisponibles(ruta.fecha)"
                                     @change="actualizarGuia(ruta.id, $event.target.value)"
-                                    class="form-select form-select-sm fw-bolder fs-5 text-center bg-light w-100 rounded-0 border-0 footer">
+                                    class="form-select form-select-sm fw-bolder fs-5 text-center bg-light w-100 rounded-0 border-0 footer" aria-label="Seleccionar guía">
                                     <option :selected="!ruta.guia_id">
                                         {{ ruta.guia_nombre || "Sin guía" }}
                                     </option>
@@ -215,23 +222,23 @@ onMounted(() => {
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Duplicar Ruta</h5>
-                    <button type="button" class="btn-close" @click="mostrarModalDuplicarRuta = false"></button>
+                    <h5 class="modal-title" id="duplicarRutaModalLabel">Duplicar Ruta</h5>
+                    <button type="button" class="btn-close" @click="mostrarModalDuplicarRuta = false" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
                     <form @submit.prevent="duplicarRuta">
                         <div class="mb-3">
                             <label for="fecha" class="form-label">Fecha</label>
-                            <input type="date" id="fecha" v-model="formData.fecha" class="form-control" />
+                            <input type="date" id="fecha" v-model="formData.fecha" class="form-control" aria-label="Fecha" />
                         </div>
                         <div class="mb-3">
                             <label for="hora" class="form-label">Hora</label>
                             <input type="time" id="hora" step="1800" min="09:00" max="21:00" v-model="formData.hora"
-                                class="form-control" />
+                                class="form-control" aria-label="Hora" />
                         </div>
                         <div class="mb-3">
                             <label for="guia" class="form-label">Guía</label>
-                            <select id="guia" v-model="formData.guia_id" class="form-select">
+                            <select id="guia" v-model="formData.guia_id" class="form-select" aria-label="Seleccionar guía">
                                 <option value="" disabled>
                                     Seleccione un guía
                                 </option>
@@ -243,7 +250,7 @@ onMounted(() => {
                         <div v-if="errorDuplicarRuta" class="alert alert-danger mb-3">
                             Rellena todos los campos
                         </div>
-                        <button type="submit" class="btn btn-success w-100">
+                        <button type="submit" class="btn btn-success w-100" aria-label="Duplicar ruta">
                             Duplicar
                         </button>
                     </form>
@@ -257,16 +264,16 @@ onMounted(() => {
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Eliminar Ruta</h5>
-                    <button type="button" class="btn-close" @click="mostrarModalEliminarRuta = false"></button>
+                    <h5 class="modal-title" id="eliminarRutaModalLabel">Eliminar Ruta</h5>
+                    <button type="button" class="btn-close" @click="mostrarModalEliminarRuta = false" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
                     <p>¿Seguro que desea eliminar la ruta {{ rutaAEliminar.titulo }}?</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary"
-                        @click="mostrarModalEliminarRuta = false">Cancelar</button>
-                    <button type="button" class="btn btn-danger" @click="eliminarRuta">Eliminar</button>
+                        @click="mostrarModalEliminarRuta = false" aria-label="Cancelar">Cancelar</button>
+                    <button type="button" class="btn btn-danger" @click="eliminarRuta" aria-label="Eliminar ruta">Eliminar</button>
                 </div>
             </div>
         </div>

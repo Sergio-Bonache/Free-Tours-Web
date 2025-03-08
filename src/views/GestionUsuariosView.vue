@@ -1,5 +1,13 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import router from "@/router";
+
+const sesion = localStorage.getItem("sesion");
+const rol = sesion ? JSON.parse(sesion).rol : null;
+
+if (rol != "admin") {
+  router.push("/");
+}
 
 const usuarios = ref([]);
 const modal = ref(false);
@@ -85,13 +93,13 @@ onMounted(() => {
             <td>{{ usuario.nombre }}</td>
             <td>{{ usuario.email }}</td>
             <td>
-              <select class="form-select" v-model="usuario.rol" @change="actualizarUsuario(usuario)">
+              <select class="form-select" v-model="usuario.rol" @change="actualizarUsuario(usuario)" :aria-label="'Seleccionar rol'">
                 <option value="cliente" :selected="usuario.rol.toLowerCase() === 'cliente'">Cliente</option>
                 <option value="guia" :selected="usuario.rol.toLowerCase() === 'guia'">Guía</option>
               </select>
             </td>
             <td class="text-center">
-              <button class="btn btn-outline-danger btn-sm w-100 fs-6" @click="abrirModalEliminar(usuario)">Eliminar</button>
+              <button class="btn btn-outline-danger btn-sm w-100 fs-6" @click="abrirModalEliminar(usuario)" :aria-label="'Eliminar usuario'">Eliminar</button>
             </td>
           </tr>
         </tbody>
@@ -103,15 +111,15 @@ onMounted(() => {
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Confirmar Eliminación</h5>
-            <button type="button" class="btn-close" @click="cerrarModalEliminar"></button>
+            <h5 class="modal-title" id="modal-title">Confirmar Eliminación</h5>
+            <button type="button" class="btn-close" @click="cerrarModalEliminar" aria-label="Cerrar"></button>
           </div>
-          <div class="modal-body">
+          <div class="modal-body" id="modal-body">
             <p>¿Seguro que quieres eliminar a <b>{{ usuarioSeleccionado.nombre }}</b>?</p>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="cerrarModalEliminar">Cancelar</button>
-            <button type="button" class="btn btn-danger" @click="eliminarUsuario">Eliminar</button>
+            <button type="button" class="btn btn-secondary" @click="cerrarModalEliminar" aria-label="Cancelar">Cancelar</button>
+            <button type="button" class="btn btn-danger" @click="eliminarUsuario" aria-label="Eliminar">Eliminar</button>
           </div>
         </div>
       </div>

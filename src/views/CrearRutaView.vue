@@ -2,6 +2,14 @@
 import { ref, onMounted } from "vue";
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import router from "@/router";
+
+const sesion = localStorage.getItem("sesion");
+const rol = sesion ? JSON.parse(sesion).rol : null;
+
+if (rol != "admin") {
+  router.push("/");
+}
 
 const formData = ref({
   titulo: '',
@@ -183,12 +191,12 @@ onMounted(() => {
             <div class="col">
               <label for="titulo" class="form-label">Título❗</label>
               <input type="text" class="form-control" id="titulo" v-model="formData.titulo"
-                placeholder="Ingrese el título" />
+                placeholder="Ingrese el título" aria-label="Título" />
             </div>
             <div class="col">
               <label for="localidad" class="form-label">Localidad❗</label>
               <input type="text" class="form-control" id="localidad" v-model="formData.localidad"
-                placeholder="Ingrese la localidad" />
+                placeholder="Ingrese la localidad" aria-label="Localidad" />
             </div>
           </div>
 
@@ -196,33 +204,33 @@ onMounted(() => {
           <div class="mb-3">
             <label for="descripcion" class="form-label">Descripción❗</label>
             <textarea class="form-control" id="descripcion" v-model="formData.descripcion" rows="3"
-              placeholder="Ingrese la descripción"></textarea>
+              placeholder="Ingrese la descripción" aria-label="Descripción"></textarea>
           </div>
 
           <!-- URL de la imagen -->
           <div class="mb-3">
             <label for="imagenUrl" class="form-label">URL de la imagen❗</label>
             <input type="text" class="form-control" id="imagenUrl" v-model="formData.imagenUrl"
-              placeholder="Ingrese la URL de la imagen" />
+              placeholder="Ingrese la URL de la imagen" aria-label="URL de la imagen" />
           </div>
 
           <!-- Fecha y Hora -->
           <div class="row mb-3">
             <div class="col">
               <label for="fecha" class="form-label">Fecha❗</label>
-              <input type="date" class="form-control" @change="obtenerGuiasDisponibles()" :min="fechaMomentoCreacion" id="fecha" v-model="formData.fecha" />
+              <input type="date" class="form-control" @change="obtenerGuiasDisponibles()" :min="fechaMomentoCreacion" id="fecha" v-model="formData.fecha" aria-label="Fecha" />
             </div>
             <div class="col">
               <label for="hora" class="form-label">Hora❗</label>
               <input type="time" class="form-control" step="1800" id="hora" min="09:00" max="21:00"
-                v-model="formData.hora" />
+                v-model="formData.hora" aria-label="Hora" />
             </div>
           </div>
 
           <!-- Guía -->
           <div class="mb-3" v-if="formData.fecha!= ''">
             <label for="guia" class="form-label">Guía</label>
-            <select class="form-control" id="guia" v-model="formData.guia_id">
+            <select class="form-control" id="guia" v-model="formData.guia_id" aria-label="Guía">
               <option value="" disabled>Seleccione un guía</option>
               <option v-for="guia in guiasDisponibles" :key="guia.id" :value="guia.id"> Guía {{ obtenerNombreGuiaPorId(guia.id) }} con ID: {{ guia.id }}</option>
               <option value="singuia">Sin guía</option>
@@ -231,7 +239,7 @@ onMounted(() => {
 
           <div class="mb-3" v-else>
             <label for="guia" class="form-label">Guía</label>
-            <select class="form-control" id="guia">
+            <select class="form-control" id="guia" aria-label="Guía">
               <option value="" selected disabled>Seleccione una fecha primero</option>
             </select>
           </div>
@@ -241,12 +249,12 @@ onMounted(() => {
             <div class="col">
               <label for="latitud" class="form-label">Latitud</label>
               <input type="text" class="form-control" id="latitud" v-model="formData.latitud"
-                placeholder="Ingrese la latitud" readonly />
+                placeholder="Ingrese la latitud" readonly aria-label="Latitud" />
             </div>
             <div class="col">
               <label for="longitud" class="form-label">Longitud</label>
               <input type="text" class="form-control" id="longitud" v-model="formData.longitud"
-                placeholder="Ingrese la longitud" readonly />
+                placeholder="Ingrese la longitud" readonly aria-label="Longitud" />
             </div>
           </div>
 
@@ -254,21 +262,21 @@ onMounted(() => {
           <div class="mb-4">
             <label class="form-label">Punto de encuentro❗</label>
             <div class="input-group">
-              <input v-model="formData.puntoEncuentro" class="form-control" placeholder="Calle Bonache, 2" />
-              <button type="button" @click.prevent="searchLocation" class="btn btn-success ps-5 pe-5">Buscar</button>
+              <input v-model="formData.puntoEncuentro" class="form-control" placeholder="Calle Bonache, 2" aria-label="Punto de encuentro" />
+              <button type="button" @click.prevent="searchLocation" class="btn btn-success ps-5 pe-5" aria-label="Buscar ubicación">Buscar</button>
             </div>
           </div>
 
           <!-- Mapa -->
-          <div id="map" style="height: 400px;" class="mb-4"></div>
+          <div id="map" style="height: 400px;" class="mb-4" aria-label="Mapa"></div>
 
           <!-- Botones -->
           <div class="row mb-3">
             <div class="col">
-              <button type="submit" class="btn btn-success w-100">Crear Ruta</button>
+              <button type="submit" class="btn btn-success w-100" aria-label="Crear Ruta">Crear Ruta</button>
             </div>
             <div class="col">
-              <button type="button" class="btn btn-danger w-100" @click="vaciarFormulario">Vaciar formulario</button>
+              <button type="button" class="btn btn-danger w-100" @click="vaciarFormulario" aria-label="Vaciar formulario">Vaciar formulario</button>
             </div>
           </div>
         </form>

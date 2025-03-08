@@ -1,5 +1,13 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import router from "@/router";
+
+const sesion = localStorage.getItem("sesion");
+const rol = sesion ? JSON.parse(sesion).rol : null;
+
+if (rol != "cliente") {
+  router.push("/");
+}
 
 const emailCliente = ref(localStorage.getItem("sesion") ? JSON.parse(localStorage.getItem("sesion")).email : "");
 const reservas = ref([]);

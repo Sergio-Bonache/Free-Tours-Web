@@ -53,18 +53,18 @@ async function iniciarSesion() {
                 <form @submit.prevent="iniciarSesion">
                   <div class="mb-3">
                     <label for="email" class="form-label">Correo electrónico</label>
-                    <input v-model="form.email" type="text" class="form-control" id="email" placeholder="Ingresa tu correo" />
+                    <input v-model="form.email" type="text" class="form-control" id="email" placeholder="Ingresa tu correo" aria-label="Correo electrónico" />
                   </div>
                   <div class="mb-3">
                     <label for="password" class="form-label">Contraseña</label>
-                    <input v-model="form.password" type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" />
+                    <input v-model="form.password" type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" aria-label="Contraseña" />
                   </div>
                   <p v-if="error" class="text-danger mt-2">{{ error }}</p>
                   <div class="d-grid">
-                    <button type="submit" class="btn btn-success">Iniciar Sesión</button>
+                    <button type="submit" class="btn btn-success" aria-label="Iniciar Sesión">Iniciar Sesión</button>
                   </div>
                   <div class="mt-3 text-center">
-                    <RouterLink to="/signup" class="text-success text-decoration-none">¿No tienes cuenta? Regístrate</RouterLink>
+                    <RouterLink to="/signup" class="text-success text-decoration-none" aria-label="Regístrate">¿No tienes cuenta? Regístrate</RouterLink>
                   </div>
                 </form>
               </div>
