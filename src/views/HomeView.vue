@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import Banner from '../components/Banner.vue';
+import router from "@/router";
 
 let preguntas = [
   {
@@ -25,63 +26,90 @@ let preguntas = [
   },
 ]
 
+const fecha = ref('');
+const fechaActual = new Date().toISOString().split('T')[0];
+const localidad = ref('');
+const localidades = ref([]);
+
+//Función para obtener las localidades de las rutas disponibles
+function obtenerLocalidadesRutas() {
+  fetch("http://localhost/freetours/api.php/rutas")
+    .then(response => response.json())
+    .then(data => {
+      localidades.value = data.filter(
+        (ruta) => ruta.fecha >= new Date().toISOString().split("T")[0] && ruta.guia_id != null
+      ).sort((a, b) => new Date(a.fecha) - new Date(b.fecha)).map(ruta => ruta.localidad);
+    })
+    .catch(error => {
+      console.error("Error al obtener rutas:", error);
+    });
+}
+
+//Función para buscar rutas disponibles en base a fecha y localidad del usuario
+function buscarRuta() {
+  router.push(`/rutasFiltradas/${fecha.value}/${localidad.value}`);
+}
+
+
+//Funciones para controlar el video
+
+function cambiarEstadoVideo() {
+  if (video.value) {
+  estaActivo.value = !video.value.paused;
+  }
+}
+
+function cambioPausarVer() {
+  if (video.value) {
+  if (video.value.paused) {
+    video.value.play();
+  } else {
+    video.value.pause();
+  }
+  }
+}
+
+function reiniciarVideo() {
+  if (video.value) {
+  video.value.currentTime = 0;
+  video.value.play();
+  }
+}
+
+function sumarSeg() {
+  if (video.value) {
+  video.value.currentTime += 5;
+  }
+}
+
+function restarSeg() {
+  if (video.value) {
+  video.value.currentTime -= 5;
+  }
+}
+
+function subirVol() {
+  if (video.value) {
+  video.value.volume = Math.min(video.value.volume + 0.1, 1);
+  }
+}
+
+function bajarVol() {
+  if (video.value) {
+  video.value.volume = Math.max(video.value.volume - 0.1, 0);
+  }
+}
+
+function cambiarSilenciado() {
+  if (video.value) {
+  video.value.muted = !video.value.muted;
+  estaSilenciado.value = video.value.muted;
+  }
+}
+
 const video = ref(null);
 const estaActivo = ref(false);
 const estaSilenciado = ref(false);
-
-const cambiarEstadoVideo = () => {
-  if (video.value) {
-    estaActivo.value = !video.value.paused;
-  }
-};
-
-const cambioPausarVer = () => {
-  if (video.value) {
-    if (video.value.paused) {
-      video.value.play();
-    } else {
-      video.value.pause();
-    }
-  }
-};
-
-const reiniciarVideo = () => {
-  if (video.value) {
-    video.value.currentTime = 0;
-    video.value.play();
-  }
-};
-
-const sumarSeg = () => {
-  if (video.value) {
-    video.value.currentTime += 5;
-  }
-};
-
-const restarSeg = () => {
-  if (video.value) {
-    video.value.currentTime -= 5;
-  }
-};
-
-const subirVol = () => {
-  if (video.value) {
-    video.value.volume = Math.min(video.value.volume + 0.1, 1);
-  }
-};
-
-const bajarVol = () => {
-  if (video.value) {
-    video.value.volume = Math.max(video.value.volume - 0.1, 0);
-  }
-};
-
-const cambiarSilenciado = () => {
-  if (video.value) {
-    video.value.muted = !video.value.muted;
-    estaSilenciado.value = video.value.muted;
-  }
-};
 
 onMounted(() => {
   if (video.value) {
@@ -97,6 +125,10 @@ onUnmounted(() => {
   }
 });
 
+onMounted(() => {
+    obtenerLocalidadesRutas();
+});
+
 </script>
 <template>
   <Banner/>
@@ -105,9 +137,13 @@ onUnmounted(() => {
     <h2 class="mb-3">Busca tu próxima aventura</h2>
     <div class="d-flex justify-content-center">
       <div class="input-group w-75 mt-3 shadow">
-        <input v-model="busqueda" type="text" class="form-control" placeholder="Buscar ruta..." />
-        <input v-model="fecha" type="date" class="form-control" />
-        <button class="btn btn-success fs-5" @click="buscarRuta">Buscar ruta</button>
+        <input v-model="fecha" :min="fechaActual" type="date" class="form-control " />
+        <select v-model="localidad" class="form-control">
+          <option value="" disabled>Selecciona una localidad</option>
+          <option v-for="localidad in localidades" :key="localidad" :value="localidad">{{ localidad }}</option>
+        </select>
+        <button v-if="fecha != ''" class="btn btn-success fs-5" @click="buscarRuta">Buscar rutas</button>
+        <button v-else class="btn fs-5" style="background-color: #d2d4d2; cursor: not-allowed;">Buscar rutas</button>
       </div>
     </div>
   </div>

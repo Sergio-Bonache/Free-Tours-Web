@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue";
 import router from "@/router";
 
+//Comprobamos que el usuario es un guía
 const sesion = localStorage.getItem("sesion");
 const rol = sesion ? JSON.parse(sesion).rol : null;
 

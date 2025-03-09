@@ -10,6 +10,7 @@ import CrearRutaView from '../views/CrearRutaView.vue'
 import GestionRutasView from '../views/GestionRutasView.vue'
 import GestionUsuariosView from '../views/GestionUsuariosView.vue'
 import RutaEspecifica from '../views/RutaEspecifica.vue';
+import RutasFiltradas from '../views/RutasFiltradas.vue';
 import NotFound from '../views/NotFound.vue'
 
 const router = createRouter({
@@ -76,6 +77,11 @@ const router = createRouter({
       name: 'rutaEspecifica',
       component: RutaEspecifica,
       props: true
+    },
+    {
+      path: '/rutasFiltradas/:fecha/:localidad?',
+      name: 'rutasFiltradas',
+      component: RutasFiltradas
     },
     { 
       path: '/:pathMatch(.*)*', 

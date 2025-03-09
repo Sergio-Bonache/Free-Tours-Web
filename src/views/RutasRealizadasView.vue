@@ -20,27 +20,30 @@ const mostrarModalValoracionHecha = ref(false);
 
 let error = ref('');
 
-const obtenerReservas = async () => {
-    try {
-        const response = await fetch(`http://localhost/freetours/api.php/reservas?email=${emailCliente.value}`, {
-            method: 'GET',
-        });
-        const data = await response.json();
+//Función para obtener las reservas del cliente
+function obtenerReservas() {
+    fetch(`http://localhost/freetours/api.php/reservas?email=${emailCliente.value}`, {
+        method: 'GET',
+    })
+    .then(response => response.json())
+    .then(data => {
         reservas.value = data;
-        console.log(reservas.value);
         filtrarRutasRealizadas();
-        await obtenerValoraciones();
-    } catch (error) {
+        obtenerValoraciones();
+    })
+    .catch(error => {
         console.error('Error al obtener las reservas:', error);
-    }
-};
+    });
+}
 
-const obtenerValoraciones = async () => {
-    try {
-        const response = await fetch(`http://localhost/freetours/api.php/valoraciones?user_id=${emailCliente.value}`);
+//Función para obtener las valoraciones del cliente
+function obtenerValoraciones() {
+    fetch(`http://localhost/freetours/api.php/valoraciones?user_id=${emailCliente.value}`)
+    .then(response => {
         if (!response.ok) throw new Error("Error al obtener las valoraciones");
-
-        const valoraciones = await response.json();
+        return response.json();
+    })
+    .then(valoraciones => {
         reservas.value.forEach(reserva => {
             const valoracion = valoraciones.find(v => v.ruta_id === reserva.ruta_id);
             if (valoracion) {
@@ -50,39 +53,36 @@ const obtenerValoraciones = async () => {
                 reserva.comentario = ""; // Inicializa el comentario si no existe
             }
         });
-    } catch (error) {
+    })
+    .catch(error => {
         console.error('Error al obtener las valoraciones:', error);
-    }
-};
-
-const filtrarRutasRealizadas = () => {
-    const hoy = new Date();
-    rutasRealizadas.value = reservas.value.filter(reserva => new Date(reserva.ruta_fecha) < hoy);
-};
-
-const incrementarCalificacion = (reserva) => {
-    if (estrellasActuales.value < 5) {
-        estrellasActuales.value++;
-        console.log("ID "+ reserva.ruta_id + ": " +reserva.valoracion);
-    }
-};
-
-const decrementarCalificacion = (reserva) => {
-    if (estrellasActuales.value > 1) {
-        estrellasActuales.value--;
-        console.log("ID "+ reserva.ruta_id + ": " +reserva.valoracion);
-    }
-};
-
-const mostrarModalValoracion = (reserva) => {
-    mostrarModalConfirmarValoracion.value = true;
-    console.log(reserva.reserva_id);
-    rutaSeleccionada.value = reserva; // Asigna el valor de reserva a rutaSeleccionada.value
-    console.log("Ruta seleccionada", rutaSeleccionada.value);
+    });
 }
 
-const enviarCalificacion = async () => {
-    console.log(rutaSeleccionada.value);
+//Función para filtrar las rutas realizadas por su fecha
+function filtrarRutasRealizadas() {
+    const hoy = new Date();
+    rutasRealizadas.value = reservas.value.filter(reserva => new Date(reserva.ruta_fecha) < hoy);
+}
+
+function incrementarCalificacion(reserva) {
+    if (estrellasActuales.value < 5) {
+        estrellasActuales.value++;
+    }
+}
+
+function decrementarCalificacion(reserva) {
+    if (estrellasActuales.value > 1) {
+        estrellasActuales.value--;
+    }
+}
+
+function mostrarModalValoracion(reserva) {
+    mostrarModalConfirmarValoracion.value = true;
+    rutaSeleccionada.value = reserva; // Asigna el valor de reserva a rutaSeleccionada.value
+}
+
+function enviarCalificacion() {
     const nuevaValoracion = {
         user_id: rutaSeleccionada.value.cliente_id,
         ruta_id: rutaSeleccionada.value.ruta_id,
@@ -90,30 +90,30 @@ const enviarCalificacion = async () => {
         comentario: rutaSeleccionada.value.comentario // Añade el comentario a la solicitud
     };
 
-    try {
-        const response = await fetch('http://localhost/freetours/api.php/valoraciones', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(nuevaValoracion)
-        });
-
+    fetch('http://localhost/freetours/api.php/valoraciones', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(nuevaValoracion)
+    })
+    .then(response => {
         if (!response.ok) {
             throw new Error('Error en la solicitud: ' + response.status);
         }
-
-        const data = await response.json();
-        console.log('Valoración creada:', data);
+        return response.json();
+    })
+    .then(data => {
         error.value = data.message;
         obtenerReservas();
         mostrarModalConfirmarValoracion.value = false;
         mostrarModalValoracionHecha.value = true;
         rutaSeleccionada.value = null;
-    } catch (error) {
+    })
+    .catch(error => {
         console.error('Error al crear la valoración:', error);
-    }
-};
+    });
+}
 
 onMounted(() => {
     obtenerReservas();

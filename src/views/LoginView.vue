@@ -6,31 +6,31 @@ const emit = defineEmits(["sesionIniciada"])
 const form = ref({ email: '', password: '' });
 const error = ref('');
 
-async function iniciarSesion() {
-    try {
-        const response = await fetch('http://localhost/freetours/api.php/usuarios');
-        const usuarios = await response.json();
+//Función para iniciar sesión
+function iniciarSesion() {
+  fetch('http://localhost/freetours/api.php/usuarios')
+    .then(response => response.json())
+    .then(usuarios => {
+      const usuarioEncontrado = usuarios.find(
+        (u) => u.email == form.value.email && u.contraseña == form.value.password
+      );
 
-        const usuarioEncontrado = usuarios.find(
-            (u) => u.email == form.value.email && u.contraseña == form.value.password
-        );
-
-        if (usuarioEncontrado) {
-            emit("sesionIniciada", {
-                nombre : usuarioEncontrado.nombre,
-                email:usuarioEncontrado.email,
-                rol: usuarioEncontrado.rol,
-                id: usuarioEncontrado.id
-
-            })
-            error.value = '';
-            router.push("/");
-        } else {
-            error.value = 'Usuario o contraseña incorrectos';
-        }
-    } catch (err) {
-        error.value = 'Error al cargar los datos';
-    }
+      if (usuarioEncontrado) {
+        emit("sesionIniciada", {
+          nombre: usuarioEncontrado.nombre,
+          email: usuarioEncontrado.email,
+          rol: usuarioEncontrado.rol,
+          id: usuarioEncontrado.id
+        });
+        error.value = '';
+        router.push("/");
+      } else {
+        error.value = 'Usuario o contraseña incorrectos';
+      }
+    })
+    .catch(() => {
+      error.value = 'Error al cargar los datos';
+    });
 }
 </script>
 

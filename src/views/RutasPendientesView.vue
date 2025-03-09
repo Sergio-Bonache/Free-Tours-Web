@@ -15,60 +15,65 @@ const rutasPendientes = ref([]);
 const mostrarModalCancelacion = ref(false);
 const reservaSeleccionada = ref(null);
 
-const obtenerReservas = async () => {
-    try {
-        const response = await fetch(`http://localhost/freetours/api.php/reservas?email=${emailCliente.value}`, {
-            method: 'GET',
-        });
-        const data = await response.json();
+//Función para obtener las reservas del cliente
+function obtenerReservas() {
+    fetch(`http://localhost/freetours/api.php/reservas?email=${emailCliente.value}`, {
+        method: 'GET',
+    })
+    .then(response => response.json())
+    .then(data => {
         reservas.value = data;
-        console.log(reservas.value);
+        (reservas.value);
         filtrarRutasPendientes();
-    } catch (error) {
+    })
+    .catch(error => {
         console.error('Error al obtener las reservas:', error);
-    }
-};
+    });
+}
 
-const filtrarRutasPendientes = () => {
+//Función para filtrar las rutas pendientes por su fecha
+function filtrarRutasPendientes() {
     const hoy = new Date();
     rutasPendientes.value = reservas.value.filter(reserva => new Date(reserva.ruta_fecha) >= hoy);
-};
+}
 
-const actualizarAsistentes = async (reserva, numPersonas) => {
-    try {
-        const response = await fetch(`http://localhost/freetours/api.php/reservas?id=${reserva.reserva_id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ num_personas: numPersonas })
-        });
-        const data = await response.json();
-        console.log('Respuesta:', data);
+//Función para actualizar el número de asistentes de una reserva
+function actualizarAsistentes(reserva, numPersonas) {
+    fetch(`http://localhost/freetours/api.php/reservas?id=${reserva.reserva_id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ num_personas: numPersonas })
+    })
+    .then(response => response.json())
+    .then(data => {
         obtenerReservas();
-    } catch (error) {
+    })
+    .catch(error => {
         console.error('Error al actualizar el número de asistentes:', error);
-    }
-};
+    });
+}
 
-const cancelarRuta = (reserva) => {
+function cancelarRuta(reserva) {
     reservaSeleccionada.value = reserva;
     mostrarModalCancelacion.value = true;
-};
+}
 
-const confirmarCancelacion = async () => {
-    try {
-        const response = await fetch(`http://localhost/freetours/api.php/reservas?id=${reservaSeleccionada.value.reserva_id}`, {
-            method: 'DELETE',
-        });
-        const data = await response.json();
-        console.log('Respuesta:', data);
+//Función para confirmar la cancelación de una reserva
+function confirmarCancelacion() {
+    fetch(`http://localhost/freetours/api.php/reservas?id=${reservaSeleccionada.value.reserva_id}`, {
+        method: 'DELETE',
+    })
+    .then(response => response.json())
+    .then(data => {
         mostrarModalCancelacion.value = false;
         obtenerReservas();
-    } catch (error) {
+    })
+    .catch(error => {
         console.error('Error al cancelar la reserva:', error);
-    }
-};
+    });
+}
 
 onMounted(() => {
     obtenerReservas();

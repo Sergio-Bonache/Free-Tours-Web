@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue";
 import router from "@/router";
 
+//Comprobamos si el usuario es administrador
 const sesion = localStorage.getItem("sesion");
 const rol = sesion ? JSON.parse(sesion).rol : null;
 
@@ -27,32 +28,36 @@ const mostrarModalEliminarRuta = ref(false);
 
 const errorDuplicarRuta = ref(false);
 
-const obtenerRutas = async () => {
-    try {
-        const response = await fetch(
-            "http://localhost/freetours/api.php/rutas"
-        );
-        const data = await response.json();
-        rutas.value = data.filter(
-            (ruta) => ruta.fecha >= new Date().toISOString().split("T")[0]
-        );
-    } catch (error) {
-        console.error("Error al obtener rutas:", error);
-    }
-};
+//Función para obtener las rutas
+function obtenerRutas() {
+    fetch("http://localhost/freetours/api.php/rutas")
+        .then((response) => response.json())
+        .then((data) => {
+            rutas.value = data;
+            rutas.value.forEach((ruta) => {
+                obtenerValoracionMedia(ruta).then((valoracionMedia) => {
+                    ruta.valoracionMedia = valoracionMedia;
+                });
+            });
+        })
+        .catch((error) => {
+            console.error("Error al obtener rutas:", error);
+        });
+}
 
-const obtenerGuias = async () => {
-    try {
-        const response = await fetch(
-            "http://localhost/freetours/api.php/usuarios"
-        );
-        const data = await response.json();
-        guias.value = data.filter((u) => u.rol.toLowerCase() === "guia");
-    } catch (error) {
-        console.error("Error al obtener guias:", error);
-    }
-};
+//Función para obtener los guías
+function obtenerGuias() {
+    fetch("http://localhost/freetours/api.php/usuarios")
+        .then((response) => response.json())
+        .then((data) => {
+            guias.value = data.filter((u) => u.rol.toLowerCase() === "guia");
+        })
+        .catch((error) => {
+            console.error("Error al obtener guias:", error);
+        });
+}
 
+//Función para obtener los guías disponibles en una fecha
 function obtenerGuiasDisponibles(fecha) {
     fetch(`http://localhost/freetours/api.php/asignaciones?fecha=${fecha}`, {
         method: "GET",
@@ -63,17 +68,41 @@ function obtenerGuiasDisponibles(fecha) {
     return guiasDisponibles.value;
 }
 
-const abrirModalDuplicarRuta = (ruta) => {
+//Función para obtener la valoración media de una ruta
+function obtenerValoracionMedia(ruta) {
+    return fetch(`http://localhost/freetours/api.php/valoraciones?ruta_id=${ruta.id}`)
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Error en la solicitud: ' + response.status);
+            }
+            return response.json();
+        })
+        .then((data) => {
+            let valoracionesRuta = data.map(valoracion => valoracion.puntuacion);
+            if (valoracionesRuta.length === 0) {
+                return null;
+            }
+            let valoracionMediaRuta = valoracionesRuta.reduce((acumulador, valoracionActual) => acumulador + valoracionActual, 0) / valoracionesRuta.length;
+            return valoracionMediaRuta;
+        })
+        .catch((error) => {
+            console.error(`Error al obtener las valoraciones para la ruta ${ruta.id}:`, error);
+        });
+}
+
+//Función para abrir el modal de duplicar una ruta
+function abrirModalDuplicarRuta(ruta) {
     rutaSeleccionada.value = ruta;
     formData.value.fecha = "";
     formData.value.hora = "";
     formData.value.guia_id = "";
     errorDuplicarRuta.value = false;
     mostrarModalDuplicarRuta.value = true;
-    obtenerGuiasDisponibles(ruta.fecha); // Llamar a la función para obtener guías disponibles
-};
+    obtenerGuiasDisponibles(ruta.fecha);
+}
 
-const duplicarRuta = () => {
+//Función para duplicar una ruta
+function duplicarRuta() {
     if (
         !formData.value.fecha ||
         !formData.value.hora ||
@@ -106,7 +135,6 @@ const duplicarRuta = () => {
     })
         .then((res) => res.json())
         .then((data) => {
-            console.log("Respuesta de la API:", data);
             if (data.status === "success") {
                 mostrarModalDuplicarRuta.value = false;
                 obtenerRutas();
@@ -115,9 +143,10 @@ const duplicarRuta = () => {
         .catch((error) => {
             console.error("Error al crear la ruta:", error);
         });
-};
+}
 
-const actualizarGuia = (ruta_id, guia_id) => {
+//Función para actualizar el guía de una ruta
+function actualizarGuia(ruta_id, guia_id) {
     fetch(`http://localhost/freetours/api.php/asignaciones`, {
         method: "POST",
         headers: {
@@ -127,7 +156,6 @@ const actualizarGuia = (ruta_id, guia_id) => {
     })
         .then((res) => res.json())
         .then((data) => {
-            console.log("Respuesta de la API:", data);
             if (data.status === "success") {
                 obtenerRutas();
             }
@@ -135,14 +163,15 @@ const actualizarGuia = (ruta_id, guia_id) => {
         .catch((error) => {
             console.error("Error al actualizar el guía:", error);
         });
-};
+}
 
-const abrirModalEliminarRuta = (ruta) => {
+function abrirModalEliminarRuta(ruta) {
     rutaAEliminar.value = ruta;
     mostrarModalEliminarRuta.value = true;
-};
+}
 
-const eliminarRuta = () => {
+//Función para eliminar una ruta
+function eliminarRuta() {
     fetch(`http://localhost/freetours/api.php/rutas/?id=${rutaAEliminar.value.id}`, {
         method: "DELETE",
     })
@@ -156,7 +185,7 @@ const eliminarRuta = () => {
         .catch((error) => {
             console.error("Error al eliminar la ruta:", error);
         });
-};
+}
 
 onMounted(() => {
     obtenerGuias();
@@ -176,12 +205,19 @@ onMounted(() => {
                         </h4>
                         <p class="text-center mb-2">
                             <img src="../assets/images/location.png" alt="Icono de ubicación" height="20" />
-
                             {{ ruta.localidad }}
                         </p>
                         <p class="text-center mb-2 fst-italic">
                             <img src="../assets/images/clock-ico.png" alt="Icono de ubicación" height="16" />
                             {{ ruta.fecha }} - {{ ruta.hora }}
+                        </p>
+                        <p v-if="ruta.valoracionMedia !== null" class="text-center mb-2 fst-italic">
+                            <img class="mb-1" src="../assets/images/estrella.png" alt="Icono de valoración" height="20" />
+                            Media de valoración: {{ ruta.valoracionMedia }}
+                        </p>
+                        <p v-else class="text-center mb-2 fst-italic">
+                            <img class="mb-1" src="../assets/images/estrella.png" alt="Icono de valoración" height="20" />
+                             Sin valoraciones aún
                         </p>
                     </div>
                     <div class="card-footer p-0">

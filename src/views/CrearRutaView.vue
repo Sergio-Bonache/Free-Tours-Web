@@ -4,12 +4,15 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import router from "@/router";
 
+//Comprbamos si el usuario es admin
 const sesion = localStorage.getItem("sesion");
 const rol = sesion ? JSON.parse(sesion).rol : null;
 
 if (rol != "admin") {
   router.push("/");
 }
+
+const guiasDisponibles = ref([]);
 
 const formData = ref({
   titulo: '',
@@ -32,6 +35,7 @@ const mostrarModalUbicacionNoEncontrada = ref(false);
 const mostrarModalCamposIncompletos = ref(false);
 const mostrarModalRutaCreada = ref(false);
 
+//Creamos el mapa y el marcador
 let map
 let marker;
 
@@ -42,32 +46,35 @@ onMounted(() => {
   }).addTo(map);
 });
 
-const searchLocation = async () => {
-  if (formData.value.puntoEncuentro == "") return;
+//Función para buscar la ubicación introducida
+function searchLocation() {
+  if (formData.value.puntoEncuentro == ""){
+    return;
+  } 
 
-  const response = await fetch(
-    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(formData.value.puntoEncuentro)}`
-  );
-  const data = await response.json();
+  fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(formData.value.puntoEncuentro)}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.length > 0) {
+        formData.value.latitud = data[0].lat;
+        formData.value.longitud = data[0].lon;
 
-  if (data.length > 0) {
-    formData.value.latitud = data[0].lat;
-    formData.value.longitud = data[0].lon;
+        const lat = parseFloat(data[0].lat);
+        const lon = parseFloat(data[0].lon);
 
-    const lat = parseFloat(data[0].lat);
-    const lon = parseFloat(data[0].lon);
+        if (marker) marker.remove();
 
-    if (marker) marker.remove();
+        marker = L.marker([lat, lon]).addTo(map)
+          .bindPopup(formData.value.puntoEncuentro)
+          .openPopup();
+        map.setView([lat, lon], 13);
+      } else {
+        mostrarModalUbicacionNoEncontrada.value = true;
+      }
+    });
+}
 
-    marker = L.marker([lat, lon]).addTo(map)
-      .bindPopup(formData.value.puntoEncuentro)
-      .openPopup();
-    map.setView([lat, lon], 13);
-  } else {
-    mostrarModalUbicacionNoEncontrada.value = true;
-  }
-};
-
+//Función para comprobar que los campos obligatorios están completos
 function comprobarFormulario() {
   if (
     !formData.value.titulo ||
@@ -85,7 +92,8 @@ function comprobarFormulario() {
   return true;
 }
 
-const enviarDatosFormulario = () => {
+//Función para enviar los datos del formulario
+function enviarDatosFormulario() {
   if (comprobarFormulario()) {
     //Modificamos la hora para que concuerde con el formato de la base de datos.
     let horaConSegundos = formData.value.hora + ":00";
@@ -102,7 +110,7 @@ const enviarDatosFormulario = () => {
       guia_id: formData.value.guia_id
     };
 
-    // Llamamos a la API y creamos la ruta.
+    //Llamamos a la API y creamos la ruta.
     fetch("http://localhost/freetours/api.php/rutas", {
       method: "POST",
       headers: {
@@ -112,7 +120,6 @@ const enviarDatosFormulario = () => {
     })
       .then(res => res.json())
       .then(data => {
-        console.log("Respuesta de la API:", data);
         if (data.status === "success") {
           //Si la ruta se crea mostramos un modal indicando que se ha creado la ruta y vaciamos el formulario.
           mostrarModalRutaCreada.value = true;
@@ -122,11 +129,10 @@ const enviarDatosFormulario = () => {
       .catch(error => {
         console.error("Error al crear la ruta:", error);
       });
-
-
   }
-};
+}
 
+//Función para vaciar el formulario
 function vaciarFormulario() {
   formData.value.titulo = '';
   formData.value.localidad = '';
@@ -147,6 +153,7 @@ function vaciarFormulario() {
   map.setView([50.84772403093738, 4.353098372274874], 13); //Restablece el punto inicial a Bruselas
 }
 
+//Función para obtener los guías disponibles en una fecha concreta
 function obtenerGuiasDisponibles() {
   fetch(`http://localhost/freetours/api.php/asignaciones?fecha=${formData.value.fecha}`, {
     method: 'GET',
@@ -156,18 +163,19 @@ function obtenerGuiasDisponibles() {
     .catch(error => console.error('Error:', error));
 }
 
-const guiasDisponibles = ref([]);
-
-async function obtenerGuias() {
-  try {
-    const respuesta = await fetch('http://localhost/freetours/api.php/usuarios');
-    const datos = await respuesta.json();
-    guiasDisponibles.value = datos.filter(u => u.rol.toLowerCase() == 'guia');
-  } catch (error) {
-    console.error("Error al obtener guias:", error);
-  }
+//Función para obtener los guías
+function obtenerGuias() {
+  fetch('http://localhost/freetours/api.php/usuarios')
+    .then(respuesta => respuesta.json())
+    .then(datos => {
+      guiasDisponibles.value = datos.filter(u => u.rol.toLowerCase() == 'guia');
+    })
+    .catch(error => {
+      console.error("Error al obtener guias:", error);
+    });
 }
 
+//Función para obtener el nombre de un guía a partir de su ID
 function obtenerNombreGuiaPorId(guiaId) {
   const guiaBuscado = guiasDisponibles.value.find(guia => guia.id == guiaId);
   return guiaBuscado ? guiaBuscado.nombre : '';

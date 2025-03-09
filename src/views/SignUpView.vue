@@ -5,10 +5,10 @@ const router = useRouter();
 const form = ref({ nombreUsuario: '', email: '', password: '' })
 const error = ref('')
 
-async function registrarUsuario() {
+function registrarUsuario() {
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
 
-  // Validaciones
+  //Validamos los datos del formulario
   if (form.value.nombreUsuario.trim() == "" || form.value.email.trim() == "" || form.value.password.trim() == "") {
     error.value = "Es obligatorio introducir todos los datos";
     return;
@@ -17,57 +17,46 @@ async function registrarUsuario() {
     return;
   }
 
-  // Primero, obtenemos la lista de usuarios existentes
-  try {
-    const responseUsuarios = await fetch('http://localhost/freetours/api.php/usuarios');
-    if (!responseUsuarios.ok) {
-      error.value = "Error al obtener la lista de usuarios";
-      return;
-    }
-    const usuarios = await responseUsuarios.json();
+  fetch('http://localhost/freetours/api.php/usuarios')
+    .then(responseUsuarios => {
+      if (!responseUsuarios.ok) {
+        throw new Error("Error al obtener la lista de usuarios");
+      }
+      return responseUsuarios.json();
+    })
+    .then(usuarios => {
+      //Filtramos los usuarios para ver si ya existe el correo
+      const correoExistente = usuarios.filter(usuario => usuario.email === form.value.email);
+      if (correoExistente.length > 0) {
+        throw new Error("Ese correo se ha registrado previamente");
+      }
 
-    // Filtramos los usuarios para ver si ya existe el correo
-    const correoExistente = usuarios.filter(usuario => usuario.email === form.value.email);
-    if (correoExistente.length > 0) {
-      error.value = "Ese correo se ha registrado previamente";
-      return;
-    }
-  } catch (err) {
-    error.value = "Error al obtener la lista de usuarios";
-    console.error(err);
-    return;
-  }
+      //Datos del usuario para enviar al backend
+      const datosNuevoUsuario = {
+        nombre: form.value.nombreUsuario,
+        email: form.value.email,
+        contraseña: form.value.password
+      };
 
-  // Datos del usuario para enviar al backend
-  const datosNuevoUsuario = {
-    nombre: form.value.nombreUsuario,  // Cambié 'nombre' a 'usuario' porque es lo que tienes en 'form'
-    email: form.value.email,
-    contraseña: form.value.password
-  };
-
-  try {
-    // Enviar la petición POST a la API
-    const response = await fetch('http://localhost/freetours/api.php/usuarios', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(datosNuevoUsuario),
-    });
-
-    // Obtener la respuesta
-
-    // Si la respuesta es exitosa, redirige a login
-    if (!response.ok) {
-      error.value = 'Error al registrar el usuario';
-    } else {
+      //Enviar la petición POST a la API
+      return fetch('http://localhost/freetours/api.php/usuarios', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(datosNuevoUsuario),
+      });
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Error al registrar el usuario');
+      }
       router.push('/login');
-    }
-  } catch (err) {
-    error.value = 'No se ha podido registrar al usuario.';
-    console.error(err);
-  }
-
+    })
+    .catch(err => {
+      error.value = err.message;
+      console.error(err);
+    });
 }
 </script>
 

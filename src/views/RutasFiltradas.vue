@@ -1,10 +1,14 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import router from "@/router";
 
 const sesion = localStorage.getItem("sesion");
 const rol = sesion ? JSON.parse(sesion).rol : null;
 
+const route = useRoute();
+const fecha = route.params.fecha;
+const localidad = route.params.localidad;
 const rutas = ref([]);
 const mostrarModalReserva = ref(false);
 const mostrarModalExito = ref(false);
@@ -18,7 +22,13 @@ function obtenerRutas() {
         .then(response => response.json())
         .then(data => {
             rutas.value = data.filter(
-                (ruta) => ruta.fecha >= new Date().toISOString().split("T")[0] && ruta.guia_id != null
+                (ruta) => {
+                    if (localidad == '') {
+                        return ruta.fecha == fecha && ruta.guia_id != null;
+                    } else {
+                        return ruta.fecha == fecha && ruta.localidad == localidad && ruta.guia_id != null;
+                    }
+                }
             ).sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
         })
         .catch(error => {
@@ -46,15 +56,15 @@ function confirmarReserva() {
         },
         body: JSON.stringify(reservaData)
     })
-    .then(response => response.json())
-    .then(data => {
-        mostrarModalReserva.value = false;
-        mostrarModalExito.value = true;
-    })
-    .catch(error => {
-        console.error('Error al realizar la reserva:', error);
-        alert('Error al realizar la reserva');
-    });
+        .then(response => response.json())
+        .then(data => {
+            mostrarModalReserva.value = false;
+            mostrarModalExito.value = true;
+        })
+        .catch(error => {
+            console.error('Error al realizar la reserva:', error);
+            alert('Error al realizar la reserva');
+        });
 }
 
 onMounted(() => {
@@ -64,11 +74,16 @@ onMounted(() => {
 
 <template>
     <div class="container mt-5">
-        <div class="row">
-            <div class="col-md-6 mb-5" v-for="ruta in rutas" :key="ruta.id">
-                <div class="card h-100 efectoHover bg-light shadow-lg">
-                        <img @click="router.push('ruta/' + ruta.id)" :src="ruta.foto" class="card-img-top imagenRuta" height="200" :alt="ruta.titulo" aria-label="Imagen de la ruta {{ ruta.titulo }}" />
-                        <div @click="router.push('ruta/' + ruta.id)" class="mt-2 bg-light" aria-label="Detalles de la ruta">
+        <h2 class="mb-4">Rutas Buscadas</h2>
+        <div v-if="rutas.length == 0">
+            <p>No se encontraron rutas para los criterios de búsqueda especificados.</p>
+        </div>
+        <div v-else>
+            <div class="row">
+                <div class="col-md-6 mb-5" v-for="ruta in rutas" :key="ruta.id">
+                    <div class="card h-100 efectoHover bg-light shadow-lg">
+                        <img @click="router.push('/ruta/' + ruta.id)" :src="ruta.foto" class="card-img-top imagenRuta" height="200" :alt="ruta.titulo" aria-label="Imagen de la ruta {{ ruta.titulo }}" />
+                        <div @click="router.push('/ruta/' + ruta.id)" class="mt-2 bg-light" aria-label="Detalles de la ruta">
                             <h4 class="text-center custom-title text-decoration-underline">
                                 {{ ruta.titulo }}
                             </h4>
@@ -81,21 +96,21 @@ onMounted(() => {
                                 {{ ruta.fecha }} - {{ ruta.hora }}
                             </p>
                         </div>
-                    <div class="card-footer p-0">
-                        <div class="row g-0 text-center">
-                            <div class="col-7">
-                                <button v-if="rol == 'cliente'" @click="realizarReserva(ruta)" class="btn btn-success fw-bold fs-5 btn-sm w-100 rounded-0 border-0 footer" aria-label="Reservar ahora">
-                                    ¡Reservar ahora!
-                                </button>
-                                <button v-else @click="router.push('/login')" class="btn btn-success fw-bold fs-5 btn-sm w-100 rounded-0 border-0 footer" aria-label="Inicia sesión para reservar la ruta">
-                                    ¡Inicia sesión para reservar!
-                                </button>
-                            </div>
-                            <div class="col-5">
-                                <div class="fw-bold fs-5 w-100 rounded-0 border-0 footer" aria-label="Guía: {{ ruta.guia_nombre }}">
-                                    <img src="../assets/images/guia-ico.png" alt="icono de guía turístico" height="35"
-                                        class="me-2">
-                                    {{ ruta.guia_nombre }}
+                        <div class="card-footer p-0">
+                            <div class="row g-0 text-center">
+                                <div class="col-7">
+                                    <button v-if="rol == 'cliente'" @click="realizarReserva(ruta)" class="btn btn-success fw-bold fs-5 btn-sm w-100 rounded-0 border-0 footer" aria-label="Reservar ahora">
+                                        ¡Reservar ahora!
+                                    </button>
+                                    <button v-else @click="router.push('/login')" class="btn btn-success fw-bold fs-5 btn-sm w-100 rounded-0 border-0 footer" aria-label="Inicia sesión para reservar la ruta">
+                                        ¡Inicia sesión para reservar!
+                                    </button>
+                                </div>
+                                <div class="col-5">
+                                    <div class="fw-bold fs-5 w-100 rounded-0 border-0 footer" aria-label="Guía: {{ ruta.guia_nombre }}">
+                                        <img src="../assets/images/guia-ico.png" alt="icono de guía turístico" height="35" class="me-2">
+                                        {{ ruta.guia_nombre }}
+                                    </div>
                                 </div>
                             </div>
                         </div>

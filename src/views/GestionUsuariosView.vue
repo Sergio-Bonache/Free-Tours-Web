@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import router from "@/router";
 
+//Comprobamos si el usuario es admin
 const sesion = localStorage.getItem("sesion");
 const rol = sesion ? JSON.parse(sesion).rol : null;
 
@@ -13,32 +14,35 @@ const usuarios = ref([]);
 const modal = ref(false);
 const usuarioSeleccionado = ref(null);
 
-async function obtenerUsuarios() {
-  try {
-    const respuesta = await fetch('http://localhost/freetours/api.php/usuarios');
-    const datos = await respuesta.json();
-    usuarios.value = datos.filter(u => u.rol.toLowerCase() !== 'admin');
-  } catch (error) {
-    console.error("Error al obtener usuarios:", error);
-  }
-}
-
-async function actualizarUsuario(usuario) {
-  try {
-    const respuesta = await fetch(`http://localhost/freetours/api.php/usuarios?id=${usuario.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ rol: usuario.rol })
+//Función para obtener los usuarios
+function obtenerUsuarios() {
+  fetch('http://localhost/freetours/api.php/usuarios')
+    .then(respuesta => respuesta.json())
+    .then(datos => {
+      usuarios.value = datos.filter(u => u.rol.toLowerCase() !== 'admin');
+    })
+    .catch(error => {
+      console.error("Error al obtener usuarios:", error);
     });
-    if (!respuesta.ok) {
+}
+//Función para actualizar el rol de un usuario
+function actualizarUsuario(usuario) {
+  fetch(`http://localhost/freetours/api.php/usuarios?id=${usuario.id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ rol: usuario.rol })
+  })
+    .then(respuesta => {
+      if (!respuesta.ok) {
+        alert('Error al actualizar usuario');
+      }
+    })
+    .catch(error => {
+      console.error("Error actualizando usuario:", error);
       alert('Error al actualizar usuario');
-    }
-  } catch (error) {
-    console.error("Error actualizando usuario:", error);
-    alert('Error al actualizar usuario');
-  }
+    });
 }
 
 function abrirModalEliminar(usuario) {
@@ -51,20 +55,21 @@ function cerrarModalEliminar() {
   usuarioSeleccionado.value = null;
 }
 
-async function eliminarUsuario() {
+//Función para eliminar un usuario
+function eliminarUsuario() {
   if (!usuarioSeleccionado.value) return;
-  try {
-    const respuesta = await fetch(`http://localhost/freetours/api.php/usuarios?id=${usuarioSeleccionado.value.id}`, {
-      method: 'DELETE'
+  fetch(`http://localhost/freetours/api.php/usuarios?id=${usuarioSeleccionado.value.id}`, {
+    method: 'DELETE'
+  })
+    .then(respuesta => respuesta.json())
+    .then(resultado => {
+      if (resultado.status === 'success') {
+        usuarios.value = usuarios.value.filter(u => u.id != usuarioSeleccionado.value.id);
+      }
+    })
+    .catch(error => {
+      console.error("Error eliminando usuario:", error);
     });
-    const resultado = await respuesta.json();
-    if (resultado.status === 'success') {
-      alert('Usuario eliminado correctamente');
-      usuarios.value = usuarios.value.filter(u => u.id != usuarioSeleccionado.value.id);
-    } 
-  } catch (error) {
-    console.error("Error eliminando usuario:", error);
-  }
   cerrarModalEliminar();
 }
 

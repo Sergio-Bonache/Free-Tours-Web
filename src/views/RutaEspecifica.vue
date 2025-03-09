@@ -18,7 +18,8 @@ const mostrarModalExito = ref(false);
 const numPersonas = ref(1);
 const emailCliente = ref(localStorage.getItem("sesion") ? JSON.parse(localStorage.getItem("sesion")).email : "");
 
-const inicializarMapa = () => {
+//Inicializamos el mapa
+function inicializarMapa() {
   if (!ruta.value || !ruta.value.latitud || !ruta.value.longitud) {
     console.error("Datos de ubicación no disponibles");
     return;
@@ -36,50 +37,53 @@ const inicializarMapa = () => {
     .bindPopup(ruta.value.localidad)
     .openPopup();
 
+  //Recargamos el mapa para que se muestre correctamente
   setTimeout(() => {
     map.invalidateSize();
   }, 1);
-};
+}
 
-const obtenerRuta = async () => {
-  try {
-    const response = await fetch(`http://localhost/freetours/api.php/rutas?id=${route.params.id}`);
-    const data = await response.json();
-    ruta.value = data;
-    inicializarMapa();
-  } catch (error) {
-    console.error("Error al obtener la ruta:", error);
-  }
-};
+//Función para obtener una ruta específica
+function obtenerRuta() {
+  fetch(`http://localhost/freetours/api.php/rutas?id=${route.params.id}`)
+    .then(response => response.json())
+    .then(data => {
+      ruta.value = data;
+      inicializarMapa();
+    })
+    .catch(error => {
+      console.error("Error al obtener la ruta:", error);
+    });
+}
 
-const realizarReserva = () => {
+function realizarReserva() {
   mostrarModalReserva.value = true;
-};
+}
 
-const confirmarReserva = async () => {
+function confirmarReserva() {
   const reservaData = {
     email: emailCliente.value,
     ruta_id: ruta.value.id,
     num_personas: numPersonas.value
   };
 
-  try {
-    const response = await fetch('http://localhost/freetours/api.php/reservas', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(reservaData)
-    });
-    const data = await response.json();
-    console.log('Respuesta:', data);
+  fetch('http://localhost/freetours/api.php/reservas', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(reservaData)
+  })
+  .then(response => response.json())
+  .then(data => {
     mostrarModalReserva.value = false;
     mostrarModalExito.value = true;
-  } catch (error) {
+  })
+  .catch(error => {
     console.error('Error al realizar la reserva:', error);
     alert('Error al realizar la reserva');
-  }
-};
+  });
+}
 
 onMounted(() => {
   obtenerRuta();
